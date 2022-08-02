@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AnagramSolver.Contracts.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,6 @@ namespace AnagramSolver.Contracts
     public interface IWordRepository
     {
         void LoadDictionary();
-        Dictionary<string, string> GetWords();
+        Dictionary<string, WordInfo> GetWords();
     }
 }

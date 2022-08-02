@@ -1,4 +1,5 @@
 ﻿using AnagramSolver.Contracts;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,9 @@ namespace AnagramSolver.BusinessLogic
 
             var anagrams = FindAnagrams(myWords);
 
-            return anagrams.ToList();
+            var maxAnagrams = int.Parse(Settings.configuration.GetSection("MaxAnagrams").Value);
+
+            return anagrams.Take(maxAnagrams).ToList();
         }
 
         public IEnumerable<string> FindAnagrams(string myWords)

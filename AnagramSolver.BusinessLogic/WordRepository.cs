@@ -1,5 +1,5 @@
-﻿using AnagramSolver.BusinessLogic.Models;
-using AnagramSolver.Contracts;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +12,7 @@ namespace AnagramSolver.BusinessLogic
     {
         private readonly string dictionaryPath = Path.GetFullPath(Path.Combine(@"zodynas.txt", "..", "..", "..", "..", "..", "zodynas.txt"));
 
-        //public IDictionary<string, List<Word>> dictionary = new Dictionary<string, List<Word>>();
-        private readonly Dictionary<string, string> _words = new Dictionary<string, string>();
+        private readonly Dictionary<string, WordInfo> _words = new Dictionary<string, WordInfo>();
 
         public void LoadDictionary()
         {
@@ -24,14 +23,14 @@ namespace AnagramSolver.BusinessLogic
                 var wordArr = line.Split('\t');
 
                 if (!_words.ContainsKey(wordArr[0]))
-                    _words.Add(wordArr[0], wordArr[1]);
+                    _words.Add(wordArr[0], new WordInfo { PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) });
 
                 if (!_words.ContainsKey(wordArr[2]))
-                    _words.Add(wordArr[2], wordArr[1]);
+                    _words.Add(wordArr[2], new WordInfo { PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) });
             }
         }
 
-        public Dictionary<string, string> GetWords()
+        public Dictionary<string, WordInfo> GetWords()
         {
             return _words;
         }
