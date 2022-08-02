@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AnagramSolver.Contracts
 {
-    internal interface IAnagramSolver
+    public interface IAnagramSolver
     {
         IList<string> GetAnagrams(string myWords);
     }

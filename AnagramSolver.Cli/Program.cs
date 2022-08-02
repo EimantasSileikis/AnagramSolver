@@ -1,4 +1,10 @@
-﻿using AnagramSolver.Cli;
+﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Cli;
 
-UI appUI = new UI();
-appUI.StartApp();
+
+WordRepository wordRepository = new WordRepository();
+wordRepository.LoadDictionary();
+
+AnagramSolver.BusinessLogic.AnagramSolver anagramSolver = new AnagramSolver.BusinessLogic.AnagramSolver(wordRepository);
+
+UI appUI = new UI(anagramSolver);

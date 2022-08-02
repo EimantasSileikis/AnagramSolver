@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AnagramSolver.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,15 @@ using System.Threading.Tasks;
 
 namespace AnagramSolver.Cli
 {
-    internal class UI
+    public class UI
     {
+        private readonly IAnagramSolver _anagramSolver;
+        public UI(IAnagramSolver anagramSolver)
+        {
+            _anagramSolver = anagramSolver;
+            StartApp();
+        }
+
         public void StartApp()
         {
             Console.WriteLine("Anagram Solver\n");
@@ -42,7 +50,20 @@ namespace AnagramSolver.Cli
             Console.Write("Your input: ");
             var input = Console.ReadLine();
 
+            if(input != null)
+            {
+                var anagrams = _anagramSolver.GetAnagrams(input);
 
+                Console.WriteLine("\nAnagrams:");
+
+                foreach (var anagram in anagrams) 
+                {
+                    Console.WriteLine(anagram);
+                }
+                Console.WriteLine();
+            }
+
+            StartApp();
         }
 
         private void AppSettings()
@@ -61,12 +82,12 @@ namespace AnagramSolver.Cli
             {
                 case "1":
                     Console.Clear();
-                    StartLookingForAnagrams();
+                    
                     break;
 
                 case "2":
                     Console.Clear();
-                    AppSettings();
+                    
                     break;
 
                 case "3":

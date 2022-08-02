@@ -8,6 +8,7 @@ namespace AnagramSolver.Contracts
 {
     public interface IWordRepository
     {
-        void ReadFromSource();
+        void LoadDictionary();
+        Dictionary<string, string> GetWords();
     }
 }
