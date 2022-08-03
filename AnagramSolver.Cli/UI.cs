@@ -1,5 +1,6 @@
 ﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,9 +13,14 @@ namespace AnagramSolver.Cli
     public class UI
     {
         private readonly IAnagramSolver _anagramSolver;
-        public UI(IAnagramSolver anagramSolver)
+        private readonly IConfiguration _config;
+        private readonly Settings _settings;
+
+        public UI(IAnagramSolver anagramSolver, IConfiguration config, Settings settings)
         {
             _anagramSolver = anagramSolver;
+            _config = config;
+            _settings = settings;
             Console.OutputEncoding = Console.InputEncoding = Encoding.Unicode;
             StartApp();
         }
@@ -60,7 +66,7 @@ namespace AnagramSolver.Cli
 
             var words = input.Split(" ");
 
-            var minLength = int.Parse(Settings.configuration.GetSection("MinWordLength").Value);
+            var minLength = _config.GetValue<int>("MinWordLength");
 
             foreach (var word in words)
             {
@@ -113,8 +119,8 @@ namespace AnagramSolver.Cli
                         break;
                     }
 
-                    Settings.configuration.GetSection("MaxAnagrams").Value = countOfAnagrams.ToString();
-                    Settings.SaveSettings();
+                    _config.GetSection("MaxAnagrams").Value = countOfAnagrams.ToString();
+                    _settings.SaveSettings();
 
                     Console.Clear();
                     StartApp();
@@ -129,9 +135,8 @@ namespace AnagramSolver.Cli
                         AppSettings();
                         break;
                     }
-
-                    Settings.configuration.GetSection("MinWordLength").Value = anagramLength.ToString();
-                    Settings.SaveSettings();
+                    _config.GetSection("MinWordLength").Value = anagramLength.ToString();
+                    _settings.SaveSettings();
 
                     Console.Clear();
                     StartApp();

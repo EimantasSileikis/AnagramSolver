@@ -1,5 +1,6 @@
 ﻿using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,12 @@ namespace AnagramSolver.BusinessLogic
     public class AnagramSolver : IAnagramSolver
     {
         private readonly IWordRepository _wordRepository;
+        private readonly IConfiguration _config;
 
-        public AnagramSolver(IWordRepository wordRepository)
+        public AnagramSolver(IWordRepository wordRepository, IConfiguration config)
         {
             _wordRepository = wordRepository;
+            _config = config;
         }
 
         public IList<string> GetAnagrams(string myWords)
@@ -25,7 +28,7 @@ namespace AnagramSolver.BusinessLogic
 
             var anagrams = FindAnagrams(myWords, wordsArr);
 
-            var maxAnagrams = int.Parse(Settings.configuration.GetSection("MaxAnagrams").Value);
+            var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
 
             return anagrams.Take(maxAnagrams).ToList();
         }
@@ -50,7 +53,7 @@ namespace AnagramSolver.BusinessLogic
             return anagramList.Distinct();
         }
 
-        private IList<string> FindAnagramsWithFewWords(HashSet<Word> words, string[]? wordsArr, string orderedWordChars, string myWords)
+        private IList<string> FindAnagramsWithFewWords(HashSet<Word> words, string[] wordsArr, string orderedWordChars, string myWords)
         {
             IList<string> anagramList = new List<string>();
 

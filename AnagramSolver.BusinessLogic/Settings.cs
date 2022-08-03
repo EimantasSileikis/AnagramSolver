@@ -13,19 +13,17 @@ namespace AnagramSolver.BusinessLogic
     public class Settings
     {
         public static Dictionary<string, int> settings = new Dictionary<string, int>();
-        public static IConfiguration? configuration;
+        private readonly IConfiguration _config;
 
-        public static void LoadSettings()
+        public Settings(IConfiguration config)
         {
-            configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
+            _config = config;
         }
 
-        public static void SaveSettings()
+        public void SaveSettings()
         {
-            var appConfig = new AppConfig { };
-            configuration.Bind(appConfig);
+            var appConfig = new AppConfig();
+            _config.Bind(appConfig);
             string json = JsonConvert.SerializeObject(appConfig);
             File.WriteAllText("appsettings.json", json);
         }

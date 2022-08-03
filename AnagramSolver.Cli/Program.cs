@@ -1,12 +1,30 @@
 ﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Cli;
+using AnagramSolver.Contracts;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
+var builder = new ConfigurationBuilder();
+BuildConfig(builder);
+builder.Build();
 
-WordRepository wordRepository = new WordRepository();
-wordRepository.LoadDictionary();
-Settings.LoadSettings();
+var host = Host.CreateDefaultBuilder()
+    .ConfigureServices((context, services) =>
+    {
+        services.AddTransient<IWordRepository, WordRepository>();
+        services.AddTransient<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
+        services.AddTransient<Settings>();
+        services.AddTransient<UI>();
+    })
+    .Build();
 
-AnagramSolver.BusinessLogic.AnagramSolver anagramSolver = new AnagramSolver.BusinessLogic.AnagramSolver(wordRepository);
+var anagramSolver = ActivatorUtilities.CreateInstance<AnagramSolver.BusinessLogic.AnagramSolver>(host.Services);
+var appUI = ActivatorUtilities.CreateInstance<UI>(host.Services);
 
-UI appUI = new UI(anagramSolver);
+static void BuildConfig(IConfigurationBuilder builder)
+{
+    builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).Build();
+}
+
 

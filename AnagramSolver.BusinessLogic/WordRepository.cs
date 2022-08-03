@@ -13,6 +13,11 @@ namespace AnagramSolver.BusinessLogic
         private readonly string dictionaryPath = Path.GetFullPath(Path.Combine(@"zodynas.txt", "..", "..", "..", "..", "..", "zodynas.txt"));
         private readonly HashSet<Word> _wordInfos = new HashSet<Word>();
 
+        public WordRepository()
+        {
+            LoadDictionary();
+        }
+
         public void LoadDictionary()
         {
             var lines = File.ReadAllLines(dictionaryPath);
