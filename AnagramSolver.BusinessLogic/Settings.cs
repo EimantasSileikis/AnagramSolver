@@ -15,7 +15,6 @@ namespace AnagramSolver.BusinessLogic
         public static Dictionary<string, int> settings = new Dictionary<string, int>();
         public static IConfiguration? configuration;
 
-
         public static void LoadSettings()
         {
             configuration = new ConfigurationBuilder()

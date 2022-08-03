@@ -55,16 +55,23 @@ namespace AnagramSolver.Cli
             Console.Write("Your input: ");
             var input = Console.ReadLine();
 
+            if (input == null)
+                return;
+
+            var words = input.Split(" ");
+
             var minLength = int.Parse(Settings.configuration.GetSection("MinWordLength").Value);
 
-            if (input != null && input.Length < minLength)
+            foreach (var word in words)
             {
-                Console.Clear();
-                Console.WriteLine($"Minimum input length is {minLength}");
-                StartLookingForAnagrams();
-                return;
+                if(word.Length < minLength)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"Minimum length of each word is {minLength}");
+                    StartLookingForAnagrams();
+                    return;
+                }
             }
-
 
             if(input != null)
             {

@@ -34,7 +34,7 @@ namespace AnagramSolver.BusinessLogic
 
             return _wordRepository
                 .GetWords().Keys.
-                Where(word => word != myWords && String.Concat(word.OrderBy(c => c)).Equals(orderedWordChars));
+                Where(word => word.Replace(" ", "").ToLower() != myWords && String.Concat(word.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
         }
 
 
