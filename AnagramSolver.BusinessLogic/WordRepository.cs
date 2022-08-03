@@ -11,28 +11,38 @@ namespace AnagramSolver.BusinessLogic
     public class WordRepository : IWordRepository
     {
         private readonly string dictionaryPath = Path.GetFullPath(Path.Combine(@"zodynas.txt", "..", "..", "..", "..", "..", "zodynas.txt"));
-
-        private readonly Dictionary<string, WordInfo> _words = new Dictionary<string, WordInfo>();
+        private readonly HashSet<Word> _wordInfos = new HashSet<Word>();
 
         public void LoadDictionary()
         {
             var lines = File.ReadAllLines(dictionaryPath);
-
+            Word lastWord = null; 
             foreach (var line in lines)
             {
                 var wordArr = line.Split('\t');
 
-                if (!_words.ContainsKey(wordArr[0]))
-                    _words.Add(wordArr[0], new WordInfo { PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) });
+                Word word = new Word { BaseWord = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                if (!_words.ContainsKey(wordArr[2]))
-                    _words.Add(wordArr[2], new WordInfo { PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) });
+                if((lastWord != null && lastWord.BaseWord == word.BaseWord && lastWord.PartOfSpeech != word.PartOfSpeech) 
+                    || (lastWord == null) || (lastWord != null && lastWord.BaseWord != word.BaseWord) )
+                {
+                    _wordInfos.Add(word);
+                    lastWord = word;
+                }
+
+                Word word2 = new Word { BaseWord = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
+
+                if ((word2.BaseWord != word.BaseWord) 
+                    || (word2.BaseWord == word.BaseWord && word2.PartOfSpeech != word.PartOfSpeech) )
+                {
+                        _wordInfos.Add(word2);
+                }
             }
         }
 
-        public Dictionary<string, WordInfo> GetWords()
+        public HashSet<Word> GetWords()
         {
-            return _words;
+            return _wordInfos;
         }
     }
 }

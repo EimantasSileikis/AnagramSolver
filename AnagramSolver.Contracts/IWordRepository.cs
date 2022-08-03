@@ -10,6 +10,6 @@ namespace AnagramSolver.Contracts
     public interface IWordRepository
     {
         void LoadDictionary();
-        Dictionary<string, WordInfo> GetWords();
+        HashSet<Word> GetWords();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,12 @@ namespace AnagramSolver.BusinessLogic
         {
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
 
-            return _wordRepository
-                .GetWords().Keys.
-                Where(word => word.Replace(" ", "").ToLower() != myWords && String.Concat(word.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
+            var words = _wordRepository.GetWords();
+            var query = words
+                .Where(word => word.BaseWord.Replace(" ", "").ToLower() != myWords 
+                && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
+
+            return query.Select(x => x.BaseWord).Distinct();
         }
 
 
