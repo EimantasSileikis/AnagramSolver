@@ -12,7 +12,6 @@ namespace AnagramSolver.BusinessLogic
 {
     public class Settings
     {
-        public static Dictionary<string, int> settings = new Dictionary<string, int>();
         private readonly IConfiguration _config;
 
         public Settings(IConfiguration config)
