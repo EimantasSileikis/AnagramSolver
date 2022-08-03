@@ -16,7 +16,7 @@ namespace AnagramSolver.BusinessLogic
         public void LoadDictionary()
         {
             var lines = File.ReadAllLines(dictionaryPath);
-            Word lastWord = null; 
+            Word? lastWord = null; 
             foreach (var line in lines)
             {
                 var wordArr = line.Split('\t');
