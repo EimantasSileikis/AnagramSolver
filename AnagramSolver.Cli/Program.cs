@@ -14,7 +14,6 @@ var host = Host.CreateDefaultBuilder()
     {
         services.AddTransient<IWordRepository, WordRepository>();
         services.AddTransient<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
-        services.AddTransient<Settings>();
         services.AddTransient<UI>();
     })
     .Build();
@@ -24,7 +23,9 @@ var appUI = ActivatorUtilities.CreateInstance<UI>(host.Services);
 
 static void BuildConfig(IConfigurationBuilder builder)
 {
-    builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).Build();
+    builder.SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .Build();
 }
 
 
