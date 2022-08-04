@@ -35,7 +35,7 @@ namespace AnagramSolver.BusinessLogic
 
         private IEnumerable<string> FindAnagrams(string myWords, string[] wordsArr)
         {
-            var words = _wordRepository.GetWords();
+            var words = _wordRepository.Words;
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
             IEnumerable<Word?> query;
 

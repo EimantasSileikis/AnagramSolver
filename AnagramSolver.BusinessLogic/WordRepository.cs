@@ -11,17 +11,21 @@ namespace AnagramSolver.BusinessLogic
     public class WordRepository : IWordRepository
     {
         private readonly string dictionaryPath = Path.GetFullPath(Path.Combine(@"zodynas.txt", "..", "..", "..", "..", "..", "zodynas.txt"));
-        private readonly HashSet<Word> _wordInfos = new HashSet<Word>();
+        public HashSet<Word> Words { get; }
+
 
         public WordRepository()
         {
-            LoadDictionary();
+            Words = LoadDictionary();
         }
 
-        public void LoadDictionary()
+        public HashSet<Word> LoadDictionary()
         {
+            var wordSet = new HashSet<Word>();
+
             var lines = File.ReadAllLines(dictionaryPath);
             Word? lastWord = null; 
+
             foreach (var line in lines)
             {
                 var wordArr = line.Split('\t');
@@ -31,7 +35,7 @@ namespace AnagramSolver.BusinessLogic
                 if((lastWord != null && lastWord.BaseWord == word.BaseWord && lastWord.PartOfSpeech != word.PartOfSpeech) 
                     || (lastWord == null) || (lastWord != null && lastWord.BaseWord != word.BaseWord) )
                 {
-                    _wordInfos.Add(word);
+                    wordSet.Add(word);
                     lastWord = word;
                 }
 
@@ -40,14 +44,11 @@ namespace AnagramSolver.BusinessLogic
                 if ((word2.BaseWord != word.BaseWord) 
                     || (word2.BaseWord == word.BaseWord && word2.PartOfSpeech != word.PartOfSpeech) )
                 {
-                        _wordInfos.Add(word2);
+                    wordSet.Add(word2);
                 }
             }
-        }
 
-        public HashSet<Word> GetWords()
-        {
-            return _wordInfos;
+            return wordSet;
         }
     }
 }

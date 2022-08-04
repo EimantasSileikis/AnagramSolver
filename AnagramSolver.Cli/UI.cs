@@ -28,7 +28,8 @@ namespace AnagramSolver.Cli
             Console.WriteLine("Anagram Solver\n");
 
             Console.WriteLine(" " +
-                                "1 - Start looking for anagrams \n ");
+                                "1 - Start looking for anagrams \n " +
+                                "2 - Exit \n ");
 
             Console.Write("Your choice: ");
             var selection = Console.ReadLine();
@@ -40,9 +41,13 @@ namespace AnagramSolver.Cli
                     StartLookingForAnagrams();
                     break;
 
+                case "2":
+                    Environment.Exit(0);
+                    break;
+
                 default:
                     Console.Clear();
-                    Console.WriteLine("Enter valid number 1\n");
+                    Console.WriteLine("Enter valid number 1 or 2\n");
                     StartApp();
                     break;
             }
