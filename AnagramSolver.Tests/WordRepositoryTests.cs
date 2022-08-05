@@ -1,5 +1,5 @@
 ﻿using AnagramSolver.BusinessLogic;
-using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Interfaces;
 using Moq;
 using System;
 using System.Collections.Generic;

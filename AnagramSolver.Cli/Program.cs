@@ -1,6 +1,6 @@
 ﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Cli;
-using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

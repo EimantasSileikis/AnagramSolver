@@ -1,4 +1,4 @@
-using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Moq;

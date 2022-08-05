@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.Contracts
+namespace AnagramSolver.Contracts.Interfaces
 {
     public interface IWordRepository
     {

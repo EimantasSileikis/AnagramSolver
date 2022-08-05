@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.Contracts
+namespace AnagramSolver.Contracts.Interfaces
 {
-    public interface IAnagramSolver
+    public interface IFileReader
     {
-        IList<string> GetAnagrams(string myWords);
+        string[] ReadFile(string path);
     }
 }
