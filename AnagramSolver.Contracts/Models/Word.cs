@@ -8,7 +8,7 @@ namespace AnagramSolver.Contracts.Models
 {
     public class Word
     {
-        public string BaseWord { get; set; }
+        public string BaseWord { get; set; } = string.Empty;
         public string? PartOfSpeech { get; set; }
         public int Number { get; set; }
     }

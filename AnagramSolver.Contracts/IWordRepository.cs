@@ -9,7 +9,7 @@ namespace AnagramSolver.Contracts
 {
     public interface IWordRepository
     {
-        HashSet<Word> Words { get; }
+        HashSet<Word> Words { get; set; }
         HashSet<Word> LoadDictionary();
     }
 }

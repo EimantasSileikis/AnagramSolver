@@ -24,7 +24,7 @@ namespace AnagramSolver.BusinessLogic
         public IList<string> GetAnagrams(string myWords)
         {
             string[] wordsArr = myWords.Split(" ");
-            myWords = myWords.Replace(" ", "");
+            myWords = myWords.Replace(" ", "").ToLower();
 
             var anagrams = FindAnagrams(myWords, wordsArr);
 
@@ -37,11 +37,11 @@ namespace AnagramSolver.BusinessLogic
         {
             var words = _wordRepository.Words;
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
-            IEnumerable<Word?> query;
 
             if (wordsArr.Length < 2)
             {
-                query = words
+                var query = 
+                    words
                     .Where(word => word.BaseWord.Replace(" ", "").ToLower() != myWords
                     && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
 

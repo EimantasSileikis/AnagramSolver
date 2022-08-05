@@ -12,9 +12,10 @@ builder.Build();
 var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
-        services.AddTransient<IWordRepository, WordRepository>();
-        services.AddTransient<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
-        services.AddTransient<UI>();
+        services.AddSingleton<IFileReader, FileReader>();
+        services.AddSingleton<IWordRepository, WordRepository>();
+        services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
+        services.AddSingleton<UI>();
     })
     .Build();
 
