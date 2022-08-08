@@ -23,22 +23,36 @@ namespace AnagramSolver.BusinessLogic
 
         public IList<string> GetAnagrams(string myWords)
         {
-            string[] wordsArr = myWords.Split(" ");
+            var words = myWords.Split(" ");
+
+            var minLength = _config.GetValue<int>("MinWordLength");
+
+            foreach (var word in words)
+            {
+                if (word.Length < minLength)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"Minimum length of each word is {minLength}");
+                    return new List<string>();
+                }
+            }
+
             myWords = myWords.Replace(" ", "").ToLower();
 
-            var anagrams = FindAnagrams(myWords, wordsArr);
+            var anagrams = FindAnagrams(myWords);
 
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
 
             return anagrams.Take(maxAnagrams).ToList();
         }
 
-        private IEnumerable<string> FindAnagrams(string myWords, string[] wordsArr)
+        private IEnumerable<string> FindAnagrams(string myWords)
         {
+            string[] wordsArray = myWords.Split(" ");
             var words = _wordRepository.Words;
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
 
-            if (wordsArr.Length < 2)
+            if (wordsArray.Length < 2)
             {
                 var query = 
                     words
@@ -47,10 +61,12 @@ namespace AnagramSolver.BusinessLogic
 
                 return query.Select(x => x.BaseWord).Distinct();
             }
+            else
+            {
+                var anagramList = FindAnagramsWithFewWords(words, wordsArray, orderedWordChars, myWords);
 
-            var anagramList = FindAnagramsWithFewWords(words, wordsArr, orderedWordChars, myWords);
-
-            return anagramList.Distinct();
+                return anagramList.Distinct();
+            }
         }
 
         private IList<string> FindAnagramsWithFewWords(HashSet<Word> words, string[] wordsArr, string orderedWordChars, string myWords)

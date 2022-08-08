@@ -61,34 +61,23 @@ namespace AnagramSolver.Cli
             if (input == null)
                 return;
 
-            var words = input.Split(" ");
+            var anagrams = _anagramSolver.GetAnagrams(input);
 
-            var minLength = _config.GetValue<int>("MinWordLength");
-
-            foreach (var word in words)
+            if(anagrams.Count > 0)
             {
-                if(word.Length < minLength)
-                {
-                    Console.Clear();
-                    Console.WriteLine($"Minimum length of each word is {minLength}");
-                    StartLookingForAnagrams();
-                    return;
-                }
-            }
-
-            if(input != null)
-            {
-                var anagrams = _anagramSolver.GetAnagrams(input);
-
                 Console.WriteLine("\nAnagrams:");
 
-                foreach (var anagram in anagrams) 
+                foreach (var anagram in anagrams)
                 {
                     Console.WriteLine(anagram);
                 }
                 Console.WriteLine();
             }
-
+            else
+            {
+                Console.WriteLine("Anagrams not found");
+            }
+            
             StartApp();
         }
     }
