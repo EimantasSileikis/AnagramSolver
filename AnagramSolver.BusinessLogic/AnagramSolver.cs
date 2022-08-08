@@ -37,6 +37,8 @@ namespace AnagramSolver.BusinessLogic
                 }
             }
 
+
+
             var anagrams = FindAnagrams(myWords);
 
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
