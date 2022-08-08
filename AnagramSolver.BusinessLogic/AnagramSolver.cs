@@ -37,7 +37,6 @@ namespace AnagramSolver.BusinessLogic
                 }
             }
 
-            myWords = myWords.Replace(" ", "").ToLower();
 
             var anagrams = FindAnagrams(myWords);
 
@@ -50,6 +49,7 @@ namespace AnagramSolver.BusinessLogic
         {
             string[] wordsArray = myWords.Split(" ");
             var words = _wordRepository.Words;
+            myWords = myWords.Replace(" ", "").ToLower();
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
 
             if (wordsArray.Length < 2)
