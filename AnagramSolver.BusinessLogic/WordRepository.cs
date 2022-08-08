@@ -10,7 +10,7 @@ namespace AnagramSolver.BusinessLogic
 {
     public class WordRepository : IWordRepository
     {
-        public string dictionaryPath = Path.GetFullPath(Path.Combine(@"zodynas.txt", "..", "..", "..", "..", "..", "zodynas.txt"));
+        public string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), "zodynas.txt");
         private readonly IFileReader _fileReader;
 
         public HashSet<Word> Words { get; set; }

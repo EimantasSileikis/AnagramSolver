@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 var builder = new ConfigurationBuilder();
 BuildConfig(builder);
 builder.Build();

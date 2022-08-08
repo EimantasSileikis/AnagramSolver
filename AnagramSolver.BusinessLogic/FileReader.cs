@@ -13,6 +13,7 @@ namespace AnagramSolver.BusinessLogic
         {
             if (!File.Exists(path))
             {
+                Console.WriteLine("File doesnt exist");
                 return new string[0];
             }
 
