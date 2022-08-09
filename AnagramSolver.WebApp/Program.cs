@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IFileReader, FileReader>();
+builder.Services.AddSingleton<IFileWriter, FileWriter>();
 builder.Services.AddSingleton<IWordRepository, WordRepository>();
 builder.Services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
 

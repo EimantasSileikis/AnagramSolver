@@ -14,6 +14,7 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
         services.AddSingleton<IFileReader, FileReader>();
+        services.AddSingleton<IFileWriter, FileWriter>();
         services.AddSingleton<IWordRepository, WordRepository>();
         services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
         services.AddSingleton<UI>();

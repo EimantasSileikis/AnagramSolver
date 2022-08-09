@@ -3,15 +3,14 @@ using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Text;
-using Shouldly;
 
-namespace AnagramSolver.Tests
+namespace AnagramSolver.Tests.BussinesLogicTests
 {
-    public class AnagramSolverTestsShouldly
+    public class AnagramSolverTests
     {
         Mock<IWordRepository> _wordRepository;
         IConfiguration _configuration;
-        AnagramSolver.BusinessLogic.AnagramSolver anagramSolver;
+        BusinessLogic.AnagramSolver anagramSolver;
 
         [SetUp]
         public void Setup()
@@ -25,7 +24,7 @@ namespace AnagramSolver.Tests
             _wordRepository = new Mock<IWordRepository>();
             _wordRepository.Setup(x => x.Words).Returns(GetSampleWords());
 
-            anagramSolver = new AnagramSolver.BusinessLogic.AnagramSolver(_wordRepository.Object, _configuration);
+            anagramSolver = new BusinessLogic.AnagramSolver(_wordRepository.Object, _configuration);
         }
 
         [TestCase("solo", "Oslo")]
@@ -36,7 +35,7 @@ namespace AnagramSolver.Tests
 
             var result = anagramSolver.GetAnagrams(input);
 
-            result.ShouldBeEquivalentTo(expected);
+            Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
@@ -46,7 +45,7 @@ namespace AnagramSolver.Tests
 
             var result = anagramSolver.GetAnagrams("labas");
 
-            result.ShouldBeEquivalentTo(expected);
+            Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
@@ -56,7 +55,7 @@ namespace AnagramSolver.Tests
 
             var result = anagramSolver.GetAnagrams("la bas rytas");
 
-            result.ShouldBeEquivalentTo(expected);
+            Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
@@ -65,17 +64,17 @@ namespace AnagramSolver.Tests
 
             var result = anagramSolver.GetAnagrams("tops");
 
-            result.Count.ShouldBe(_configuration.GetValue<int>("MaxAnagrams"));
+            Assert.That(result.Count, Is.EqualTo(_configuration.GetValue<int>("MaxAnagrams")));
         }
 
         [Test]
         public void GetAnagrams_FindsLessAnagramsThanMax_ReturnsListWithAllSolutions()
         {
-            var expected = new List<string> { "Oslo", "solo"};
+            var expected = new List<string> { "Oslo", "solo" };
 
             var result = anagramSolver.GetAnagrams("loso");
 
-            result.Count.ShouldBe(expected.Count);
+            Assert.That(result.Count, Is.EqualTo(expected.Count));
         }
 
         private HashSet<Word> GetSampleWords()
@@ -114,7 +113,7 @@ namespace AnagramSolver.Tests
                 },
                 new Word
                 {
-                    BaseWord = "stop", 
+                    BaseWord = "stop",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
