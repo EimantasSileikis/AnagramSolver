@@ -11,5 +11,7 @@ namespace AnagramSolver.Contracts.Interfaces
     {
         HashSet<Word> Words { get; set; }
         HashSet<Word> LoadDictionary();
+        bool WordExists(Word word);
+        void AddWord(Word word);
     }
 }

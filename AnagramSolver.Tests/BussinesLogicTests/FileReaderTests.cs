@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Shouldly;
 
-namespace AnagramSolver.Tests
+namespace AnagramSolver.Tests.BussinesLogicTests
 {
-    public class FileReaderTestsShouldly
+    public class FileReaderTests
     {
         [SetUp]
         public void Setup() { }
@@ -21,7 +20,7 @@ namespace AnagramSolver.Tests
 
             var result = fileReader.ReadFile("");
 
-            result.ShouldBeEmpty();
+            Assert.That(result, Is.Empty);
         }
     }
 }

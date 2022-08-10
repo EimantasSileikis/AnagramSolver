@@ -1,10 +1,5 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnagramSolver.BusinessLogic
 {
@@ -12,12 +7,14 @@ namespace AnagramSolver.BusinessLogic
     {
         public string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), "zodynas.txt");
         private readonly IFileReader _fileReader;
+        private readonly IFileWriter _fileWriter;
 
         public HashSet<Word> Words { get; set; }
 
-        public WordRepository(IFileReader fileReader)
+        public WordRepository(IFileReader fileReader, IFileWriter fileWriter)
         {
             _fileReader = fileReader;
+            _fileWriter = fileWriter;
             Words = LoadDictionary();
         }
 
@@ -51,6 +48,20 @@ namespace AnagramSolver.BusinessLogic
             }
 
             return wordSet;
+        }
+
+        public bool WordExists(Word word)
+        {
+            return Words.Contains(word);
+        }
+
+        public void AddWord(Word word)
+        {
+            if(word != null)
+            {
+                Words.Add(word);
+                _fileWriter.WriteLine(dictionaryPath, word.ToString());
+            }
         }
     }
 }

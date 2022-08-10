@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.Tests
+namespace AnagramSolver.Tests.BussinesLogicTests
 {
     public class WordRepositoryTests
     {
         Mock<IFileReader> _fileReader;
 
         [SetUp]
-        public void Setup() 
+        public void Setup()
         {
             _fileReader = new Mock<IFileReader>();
         }
@@ -23,7 +23,8 @@ namespace AnagramSolver.Tests
         public void LoadDictionary_Always_ReturnsListWithoutDuplicates()
         {
             _fileReader.Setup(x => x.ReadFile("")).Returns(new string[] { "labas\tbdv\tlabas\t3", "labas\tbdv\tlabas\t3" });
-            var wordRepository = new WordRepository(_fileReader.Object);
+            Mock<IFileWriter> _fileWriter = new Mock<IFileWriter>();
+            var wordRepository = new WordRepository(_fileReader.Object, _fileWriter.Object);
             wordRepository.dictionaryPath = "";
 
             var words = wordRepository.LoadDictionary();

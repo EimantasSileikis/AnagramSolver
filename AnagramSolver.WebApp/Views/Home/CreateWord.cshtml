@@ -1,0 +1,32 @@
+﻿@using AnagramSolver.Contracts.Models
+@model Word
+
+<h1>Create</h1>
+
+<h4>Word</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreateWord">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div>
+            <label asp-for="BaseWord">Word</label>
+            <input asp-for="BaseWord" class="form-control" />
+            <span asp-validation-for="BaseWord" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="PartOfSpeech" class="control-label">Part of speech</label>
+            <input asp-for="PartOfSpeech" class="form-control" />
+            <span asp-validation-for="PartOfSpeech" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="Number" class="control-label">Number</label>
+            <input asp-for="Number" class="form-control" />
+            <span asp-validation-for="Number" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </form>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@model List<string>
+
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Input: <input type="text" name="word" />
+            <button type="submit" class="btn btn-default">Find</button>
+        </p>
+    </div>
+</form>
+
+@if(Model != null)
+{
+    @if (Model.Count > 0)
+    {
+        <h5>Word "@Context.Request.Query["word"]" anagrams:</h5>
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li>@item</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <h5>No anagrams found!</h5>
+    }
+}
+
