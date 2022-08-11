@@ -22,6 +22,7 @@ namespace AnagramSolver.WebApp.Controllers
             if (word == null || word == string.Empty)
                 return View(null);
 
+            Response.Cookies.Append("lastInput", word);
             var data = _anagramSolver.GetAnagrams(word);
 
             return View(data);
