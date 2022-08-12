@@ -37,11 +37,11 @@
 
 <a asp-action="Anagrams"
    asp-route-pageNumber="@(Model.PageIndex - 1)"
-   class="btn btn-default @prevDisabled">
+   class="btn btn-secondary @prevDisabled">
     Previous
 </a>
 <a asp-action="Anagrams"
    asp-route-pageNumber="@(Model.PageIndex + 1)"
-   class="btn btn-default @nextDisabled">
+   class="btn btn-primary @nextDisabled">
     Next
 </a>
