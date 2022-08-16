@@ -1,6 +1,7 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace AnagramSolver.BusinessLogic
 {
@@ -8,6 +9,7 @@ namespace AnagramSolver.BusinessLogic
     {
         private readonly IWordRepository _wordRepository;
         private readonly IConfiguration _config;
+        private readonly string url = "https://localhost:7127/api/anagrams/";
 
         public AnagramSolver(IWordRepository wordRepository, IConfiguration config)
         {
@@ -31,13 +33,25 @@ namespace AnagramSolver.BusinessLogic
                 }
             }
 
-
-
             var anagrams = FindAnagrams(myWords);
 
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
 
             return anagrams.Take(maxAnagrams).ToList();
+        }
+
+        public async Task<List<string>> RequestAnagrams(string myWords)
+        {
+            using (var client = new HttpClient())
+            {
+                var responseBody = await client.GetStringAsync($"{url}{myWords}");
+                var anagrams = JsonConvert.DeserializeObject<List<string>>(responseBody);
+
+                if(anagrams != null)
+                    return anagrams;
+            }
+
+            return new List<string>();
         }
 
         private IEnumerable<string> FindAnagrams(string myWords)

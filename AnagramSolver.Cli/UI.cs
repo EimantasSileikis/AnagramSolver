@@ -23,7 +23,8 @@ namespace AnagramSolver.Cli
 
             Console.WriteLine(" " +
                                 "1 - Start looking for anagrams \n " +
-                                "2 - Exit \n ");
+                                "2 - Request anagrams \n " +
+                                "3 - Exit \n ");
 
             Console.Write("Your choice: ");
             var selection = Console.ReadLine();
@@ -32,32 +33,56 @@ namespace AnagramSolver.Cli
             {
                 case "1":
                     Console.Clear();
-                    StartLookingForAnagrams();
+                    StartLookingForAnagrams(1);
                     break;
 
                 case "2":
+                    Console.Clear();
+                    StartLookingForAnagrams(2);
+                    StartApp();
+                    break;
+
+                case "3":
                     Environment.Exit(0);
                     break;
 
                 default:
                     Console.Clear();
-                    Console.WriteLine("Enter valid number 1 or 2\n");
+                    Console.WriteLine("Enter valid number 1-3\n");
                     StartApp();
                     break;
             }
         }
 
-        private void StartLookingForAnagrams()
+        private void StartLookingForAnagrams(int selection)
         {
+            IList<string> anagrams;
             Console.Write("Your input: ");
             var input = Console.ReadLine();
 
             if (input == null)
                 return;
 
-            var anagrams = _anagramSolver.GetAnagrams(input);
+            if (selection == 1)
+            {
+                anagrams = _anagramSolver.GetAnagrams(input);
+            }
+            else
+            {
+                var task = _anagramSolver.RequestAnagrams(input);
+                task.Wait();
+                anagrams = task.Result;
+            }
+            
 
-            if(anagrams.Count > 0)
+            PrintAnagrams(anagrams);
+
+            StartApp();
+        }
+
+        private void PrintAnagrams(IList<string> anagrams)
+        {
+            if (anagrams.Count > 0)
             {
                 Console.WriteLine("\nAnagrams:");
 
@@ -71,8 +96,6 @@ namespace AnagramSolver.Cli
             {
                 Console.WriteLine("Anagrams not found");
             }
-            
-            StartApp();
         }
     }
 }
