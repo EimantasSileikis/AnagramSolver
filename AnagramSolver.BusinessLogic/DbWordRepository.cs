@@ -184,13 +184,13 @@ namespace AnagramSolver.BusinessLogic
             return words;
         }
 
-        public void StoreSearchData(string ipAddress, string inputWord, List<string> anagrams)
+        public void StoreSearchData(string ipAddress, string inputWord, List<string> anagrams, int timeSpent)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 connection.Open();
                 var sql = "INSERT INTO dbo.SearchHistory (IpAddress, TimeSpent, SearchWord, Anagrams) " +
-                      $"VALUES ('{ipAddress}', '0', N'{inputWord}', '{string.Join(",", anagrams)}')";
+                      $"VALUES ('{ipAddress}', '{timeSpent}', N'{inputWord}', '{string.Join(",", anagrams)}')";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {

@@ -2,6 +2,7 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Web;
 
 namespace AnagramSolver.WebApp.Controllers
@@ -19,16 +20,19 @@ namespace AnagramSolver.WebApp.Controllers
 
         public IActionResult Index(string word)
         {
-            _wordRepository.DeleteTableData("SearchHistory");
+            //_wordRepository.DeleteTableData("SearchHistory");
 
             if (word == null || word == string.Empty)
                 return View(null);
 
             //Response.Cookies.Append("lastInput", word);
 
-            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             var data = _anagramSolver.GetAnagrams(word);
-            _wordRepository.StoreSearchData(remoteIpAddress, word, data.ToList());
+            stopwatch.Stop();
+            _wordRepository.StoreSearchData(remoteIpAddress, word, data.ToList(), (int)stopwatch.ElapsedMilliseconds);
 
             return View(data);
         }

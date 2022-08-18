@@ -32,23 +32,30 @@ namespace AnagramSolver.Cli
             {
                 case "1":
                     Console.Clear();
-                    StartLookingForAnagrams();
+                    StartLookingForAnagrams(1);
                     break;
 
                 case "2":
+                    Console.Clear();
+                    StartLookingForAnagrams(2);
+                    StartApp();
+                    break;
+
+                case "3":
                     Environment.Exit(0);
                     break;
 
                 default:
                     Console.Clear();
-                    Console.WriteLine("Enter valid number 1 or 2\n");
+                    Console.WriteLine("Enter valid number 1-3\n");
                     StartApp();
                     break;
             }
         }
 
-        private void StartLookingForAnagrams()
+        private void StartLookingForAnagrams(int selection)
         {
+            IList<string> anagrams;
             Console.Write("Your input: ");
             var input = Console.ReadLine();
 
@@ -57,7 +64,7 @@ namespace AnagramSolver.Cli
 
             if (selection == 1)
             {
-                anagrams = _anagramSolver.GetAnagrams(input.Trim());
+                anagrams = _anagramSolver.GetAnagrams(input);
             }
             else
             {
@@ -65,7 +72,7 @@ namespace AnagramSolver.Cli
                 task.Wait();
                 anagrams = task.Result;
             }
-            
+
 
             PrintAnagrams(anagrams);
 

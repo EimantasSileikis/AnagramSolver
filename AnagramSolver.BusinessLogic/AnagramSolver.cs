@@ -1,6 +1,7 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace AnagramSolver.BusinessLogic
 {
@@ -8,6 +9,7 @@ namespace AnagramSolver.BusinessLogic
     {
         private readonly IDbWordRepository _wordRepository;
         private readonly IConfiguration _config;
+        private readonly string url = "https://localhost:7127/api/anagrams/";
 
         public AnagramSolver(IDbWordRepository wordRepository, IConfiguration config)
         {

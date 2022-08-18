@@ -2,6 +2,7 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Controllers;
 using AnagramSolver.WebApp.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
@@ -29,6 +30,16 @@ namespace AnagramSolver.Tests.ControllersTests
         {
             _anagramSolver.Setup(x => x.GetAnagrams("abc")).Returns(new List<string> { "bac", "cab" });
             var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    Connection =
+                {
+                    RemoteIpAddress = new System.Net.IPAddress(16885952)
+                }
+                }
+            };
             var result = controller.Index("abc");
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
