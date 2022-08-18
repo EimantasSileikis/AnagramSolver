@@ -23,7 +23,8 @@ namespace AnagramSolver.Cli
 
             Console.WriteLine(" " +
                                 "1 - Start looking for anagrams \n " +
-                                "2 - Exit \n ");
+                                "2 - Request anagrams \n " +
+                                "3 - Exit \n ");
 
             Console.Write("Your choice: ");
             var selection = Console.ReadLine();
@@ -72,10 +73,7 @@ namespace AnagramSolver.Cli
                 task.Wait();
                 anagrams = task.Result;
             }
-
-
             PrintAnagrams(anagrams);
-
             StartApp();
         }
 
@@ -95,8 +93,6 @@ namespace AnagramSolver.Cli
             {
                 Console.WriteLine("Anagrams not found");
             }
-            
-            StartApp();
         }
     }
 }

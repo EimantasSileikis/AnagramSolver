@@ -30,6 +30,7 @@ namespace AnagramSolver.WebApp.Controllers
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
+
             var data = _anagramSolver.GetAnagrams(word);
             stopwatch.Stop();
             _wordRepository.StoreSearchData(remoteIpAddress, word, data.ToList(), (int)stopwatch.ElapsedMilliseconds);

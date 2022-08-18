@@ -65,6 +65,20 @@ namespace AnagramSolver.BusinessLogic
             return new List<string>();
         }
 
+        public async Task<List<string>> RequestAnagrams(string myWords)
+        {
+            using (var client = new HttpClient())
+            {
+                var responseBody = await client.GetStringAsync($"{url}{myWords}");
+                var anagrams = JsonConvert.DeserializeObject<List<string>>(responseBody);
+
+                if(anagrams != null)
+                    return anagrams;
+            }
+
+            return new List<string>();
+        }
+
         private IEnumerable<string> FindAnagrams(string myWords)
         {
             string[] wordsArray = myWords.Split(" ");
