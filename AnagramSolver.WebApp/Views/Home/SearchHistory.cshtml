@@ -1,0 +1,10 @@
+﻿@using AnagramSolver.Contracts.Models
+@model List<SearchHistory>
+
+<h5>Search History</h5>
+<ul>
+    @foreach(var search in Model)
+    {
+        <li>Ip Address: @search.IpAddress   |   Time Spent (ms): @search.TimeSpent   |   Search Word: @search.SearchWord    |   Anagrams: @search.Anagrams</li>
+    }
+</ul>
