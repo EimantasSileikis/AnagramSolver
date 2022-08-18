@@ -55,9 +55,26 @@ namespace AnagramSolver.Cli
             if (input == null)
                 return;
 
-            var anagrams = _anagramSolver.GetAnagrams(input);
+            if (selection == 1)
+            {
+                anagrams = _anagramSolver.GetAnagrams(input.Trim());
+            }
+            else
+            {
+                var task = _anagramSolver.RequestAnagrams(input);
+                task.Wait();
+                anagrams = task.Result;
+            }
+            
 
-            if(anagrams.Count > 0)
+            PrintAnagrams(anagrams);
+
+            StartApp();
+        }
+
+        private void PrintAnagrams(IList<string> anagrams)
+        {
+            if (anagrams.Count > 0)
             {
                 Console.WriteLine("\nAnagrams:");
 

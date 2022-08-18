@@ -2,16 +2,16 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using System.Web;
 
 namespace AnagramSolver.WebApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IAnagramSolver _anagramSolver;
-        private readonly IWordRepository _wordRepository;
+        private readonly IDbWordRepository _wordRepository;
 
-        public HomeController(IAnagramSolver anagramSolver, IWordRepository wordRepository)
+        public HomeController(IAnagramSolver anagramSolver, IDbWordRepository wordRepository)
         {
             _anagramSolver = anagramSolver;
             _wordRepository = wordRepository;
@@ -19,20 +19,40 @@ namespace AnagramSolver.WebApp.Controllers
 
         public IActionResult Index(string word)
         {
+            _wordRepository.DeleteTableData("SearchHistory");
+
             if (word == null || word == string.Empty)
                 return View(null);
 
+            //Response.Cookies.Append("lastInput", word);
+
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             var data = _anagramSolver.GetAnagrams(word);
+            _wordRepository.StoreSearchData(remoteIpAddress, word, data.ToList());
 
             return View(data);
         }
 
         public IActionResult Anagrams(int? pageNumber)
         {
-            var data = _wordRepository.Words;
+            var data = _wordRepository.LoadDictionary();
             int pageSize = 100;
 
             return View(PaginatedList<Word>.Create(data, pageNumber ?? 1, pageSize));
+        }
+
+        public IActionResult SearchWord(string? word)
+        {
+            if(word == null || word == string.Empty)
+            {
+                return View(null);
+            }
+            else
+            {
+                var words = _wordRepository.SearchWord(word);
+
+                return View(words);
+            }
         }
 
         public IActionResult CreateWord()
@@ -58,6 +78,13 @@ namespace AnagramSolver.WebApp.Controllers
             {
                 return BadRequest("Word already exists");
             }
+        }
+
+        public IActionResult SearchHistory()
+        {
+            var history = _wordRepository.GetSearchHistory();
+
+            return View(history);
         }
     }
 }

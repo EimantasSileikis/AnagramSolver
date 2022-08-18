@@ -6,10 +6,10 @@ namespace AnagramSolver.BusinessLogic
 {
     public class AnagramSolver : IAnagramSolver
     {
-        private readonly IWordRepository _wordRepository;
+        private readonly IDbWordRepository _wordRepository;
         private readonly IConfiguration _config;
 
-        public AnagramSolver(IWordRepository wordRepository, IConfiguration config)
+        public AnagramSolver(IDbWordRepository wordRepository, IConfiguration config)
         {
             _wordRepository = wordRepository;
             _config = config;
@@ -17,6 +17,7 @@ namespace AnagramSolver.BusinessLogic
 
         public IList<string> GetAnagrams(string myWords)
         {
+            myWords = myWords.Trim();
             var words = myWords.Split(" ");
 
             var minLength = _config.GetValue<int>("MinWordLength");
@@ -31,25 +32,47 @@ namespace AnagramSolver.BusinessLogic
                 }
             }
 
-
-
-            var anagrams = FindAnagrams(myWords);
-
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
 
-            return anagrams.Take(maxAnagrams).ToList();
+            if (_wordRepository.AnagramsFound(myWords))
+            {
+                var anagrams = _wordRepository.GetCachedAnagrams(myWords);
+                return anagrams.Take(maxAnagrams).ToList();
+            }
+            else
+            {
+                var anagrams = FindAnagrams(myWords);
+                _wordRepository.StoreToCachedTable(myWords, anagrams.ToList());
+                return anagrams.Take(maxAnagrams).ToList();
+            }
+        }
+
+       
+
+        public async Task<List<string>> RequestAnagrams(string myWords)
+        {
+            using (var client = new HttpClient())
+            {
+                var responseBody = await client.GetStringAsync($"{url}{myWords}");
+                var anagrams = JsonConvert.DeserializeObject<List<string>>(responseBody);
+
+                if (anagrams != null)
+                    return anagrams;
+            }
+
+            return new List<string>();
         }
 
         private IEnumerable<string> FindAnagrams(string myWords)
         {
             string[] wordsArray = myWords.Split(" ");
-            var words = _wordRepository.Words;
+            var words = _wordRepository.LoadDictionary();
             myWords = myWords.Replace(" ", "").ToLower();
             var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
 
             if (wordsArray.Length < 2)
             {
-                var query = 
+                var query =
                     words
                     .Where(word => word.BaseWord.Replace(" ", "").ToLower() != myWords
                     && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
