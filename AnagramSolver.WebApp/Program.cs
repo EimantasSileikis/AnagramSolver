@@ -1,5 +1,7 @@
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts.Interfaces;
+using AnagramSolver.EF.CodeFirst;
+using AnagramSolver.EF.CodeFirst.Data;
 using AnagramSolver.EF.DatabaseFirst.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,13 +10,13 @@ Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<AnagramsContext>(options =>
-  options.UseSqlServer(builder.Configuration.GetConnectionString("WordsDatabase")));
+builder.Services.AddDbContext<CodeFirstContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("CodeFirstDb")));
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IFileReader, FileReader>();
 builder.Services.AddScoped<IFileWriter, FileWriter>();
 builder.Services.AddScoped<IWordRepository, WordRepository>();
-builder.Services.AddScoped<IDbWordRepository, AnagramSolver.EF.DatabaseFirst.WordRepository> ();
+builder.Services.AddScoped<IDbWordRepository, CodeFirstWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
 
 

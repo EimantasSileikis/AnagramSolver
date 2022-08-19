@@ -1,5 +1,6 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
+using AnagramSolver.EF.CodeFirst.Models;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -88,8 +89,10 @@ namespace AnagramSolver.WebApp.Controllers
         public IActionResult SearchHistory()
         {
             var history = _wordRepository.GetSearchHistory();
+            if(history != null)
+                return View(history);
 
-            return View(history);
+            return new EmptyResult();
         }
     }
 }

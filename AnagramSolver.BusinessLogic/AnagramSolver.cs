@@ -1,5 +1,6 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
+using AnagramSolver.EF.CodeFirst.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -48,8 +49,6 @@ namespace AnagramSolver.BusinessLogic
                 return anagrams.Take(maxAnagrams).ToList();
             }
         }
-
-       
 
         public async Task<List<string>> RequestAnagrams(string myWords)
         {

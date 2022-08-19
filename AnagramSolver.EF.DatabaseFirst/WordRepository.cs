@@ -33,7 +33,7 @@ namespace AnagramSolver.EF.DatabaseFirst
 
         public void DeleteTableData(string tableName)
         {
-            throw new NotImplementedException();
+            
         }
 
         public List<string> GetCachedAnagrams(string inputWord)
