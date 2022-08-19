@@ -40,9 +40,9 @@ namespace AnagramSolver.Tests.BussinesLogicTests
             _fileReader.Setup(x => x.ReadFile("")).Returns(new string[] { "labas\tbdv\tlabas\t3", "balas\tdkt\tbalas\t1", "stalas\tdkt\tstalas\t2" });
             var wordRepository = new WordRepository(_fileReader.Object, _fileWriter.Object);
             wordRepository.dictionaryPath = "";
-            var expected = new HashSet<Word> {  new Word { BaseWord = "labas", PartOfSpeech = "bdv", Number = 3 },
-                                                new Word { BaseWord = "balas", PartOfSpeech = "dkt", Number = 1 },
-                                                new Word { BaseWord = "stalas", PartOfSpeech = "dkt", Number = 2 }};
+            var expected = new HashSet<WordModel> {  new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 },
+                                                new WordModel { Word = "balas", PartOfSpeech = "dkt", Number = 1 },
+                                                new WordModel { Word = "stalas", PartOfSpeech = "dkt", Number = 2 }};
 
             var result = wordRepository.LoadDictionary();
 
@@ -53,9 +53,9 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         public void WordExists_WhenExists_ReturnsTrue()
         {
             var wordRepository = new WordRepository(_fileReader.Object, _fileWriter.Object);
-            wordRepository.Words.Add(new Word { BaseWord = "labas", PartOfSpeech = "bdv", Number = 3 });
+            wordRepository.Words.Add(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 });
 
-            var result = wordRepository.WordExists(new Word { BaseWord = "labas", PartOfSpeech = "bdv", Number = 3});
+            var result = wordRepository.WordExists(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3});
 
             Assert.That(result, Is.True);
         }
@@ -65,7 +65,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         {
             var wordRepository = new WordRepository(_fileReader.Object, _fileWriter.Object);
 
-            var result = wordRepository.WordExists(new Word { BaseWord = "labas", PartOfSpeech = "bdv", Number = 3 });
+            var result = wordRepository.WordExists(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 });
 
             Assert.That(result, Is.False);
         }
@@ -74,8 +74,8 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         public void AddWord_WhenWordIsNotNull_AddsWordToHashSet()
         {
             var wordRepository = new WordRepository(_fileReader.Object, _fileWriter.Object);
-            var word = new Word { BaseWord = "labas", PartOfSpeech = "bdv", Number = 3 };
-            var expected = new HashSet<Word> { word };
+            var word = new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 };
+            var expected = new HashSet<WordModel> { word };
 
             wordRepository.AddWord(word);
             var result = wordRepository.Words;

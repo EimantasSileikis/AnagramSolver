@@ -1,14 +1,8 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnagramSolver.BusinessLogic
 {
@@ -19,7 +13,7 @@ namespace AnagramSolver.BusinessLogic
         private readonly IConfiguration _config;
         SqlConnectionStringBuilder builder;
 
-        public HashSet<Word> Words { get; set; }
+        public HashSet<WordModel> Words { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public DbWordRepository(IFileReader fileReader, IConfiguration config)
         {
@@ -32,18 +26,18 @@ namespace AnagramSolver.BusinessLogic
             //SeedDatabase();
         }
 
-        public void AddWord(Word word)
+        public void AddWord(WordModel word)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 connection.Open();
-                if (word.BaseWord.Contains("'"))
+                if (word.Word.Contains("'"))
                 {
-                    word.BaseWord = word.BaseWord.Replace("'", "''");
+                    word.Word = word.Word.Replace("'", "''");
                 }
 
                 var sql = "INSERT INTO dbo.Word (Word, PartOfSpeech, Number) " +
-                          $"VALUES (N'{word.BaseWord}', '{word.PartOfSpeech}', '{word.Number}')";
+                          $"VALUES (N'{word.Word}', '{word.PartOfSpeech}', '{word.Number}')";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
@@ -53,9 +47,9 @@ namespace AnagramSolver.BusinessLogic
             }
         }
 
-        public HashSet<Word> LoadDictionary()
+        public HashSet<WordModel> LoadDictionary()
         {
-            var wordSet = new HashSet<Word>();
+            var wordSet = new HashSet<WordModel>();
 
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -70,9 +64,9 @@ namespace AnagramSolver.BusinessLogic
                         {
                             while (reader.Read())
                             {
-                                var word = new Word()
+                                var word = new WordModel()
                                 {
-                                    BaseWord = reader.GetString(1),
+                                    Word = reader.GetString(1),
                                     PartOfSpeech = reader.GetString(2),
                                     Number = reader.GetInt32(3)
                                 };
@@ -86,14 +80,14 @@ namespace AnagramSolver.BusinessLogic
             return wordSet;
         }
 
-        public bool WordExists(Word word)
+        public bool WordExists(WordModel word)
         {
             return LoadDictionary().Contains(word);
         }
         
-        public List<Word> SearchWord(string word)
+        public List<WordModel> SearchWord(string word)
         {
-            var words = new List<Word>();
+            var words = new List<WordModel>();
 
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -109,9 +103,9 @@ namespace AnagramSolver.BusinessLogic
                         {
                             while (reader.Read())
                             {
-                                var wordObj = new Word()
+                                var wordObj = new WordModel()
                                 {
-                                    BaseWord = reader.GetString(1),
+                                    Word = reader.GetString(1),
                                     PartOfSpeech = reader.GetString(2),
                                     Number = reader.GetInt32(3)
                                 };
@@ -269,7 +263,7 @@ namespace AnagramSolver.BusinessLogic
         {
             var lines = _fileReader.ReadFile(dictionaryPath);
 
-            Word? lastWord = null;
+            WordModel? lastWord = null;
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 connection.Open();
@@ -277,18 +271,18 @@ namespace AnagramSolver.BusinessLogic
                 {
                     var wordArr = line.Split('\t');
 
-                    Word word = new Word { BaseWord = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
+                    WordModel word = new WordModel { Word = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                    if ((lastWord != null && lastWord.BaseWord == word.BaseWord && lastWord.PartOfSpeech != word.PartOfSpeech)
-                        || (lastWord == null) || (lastWord != null && lastWord.BaseWord != word.BaseWord))
+                    if ((lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech)
+                        || (lastWord == null) || (lastWord != null && lastWord.Word != word.Word))
                     {
-                        if (word.BaseWord.Contains("'"))
+                        if (word.Word.Contains("'"))
                         {
-                            word.BaseWord = word.BaseWord.Replace("'", "''");
+                            word.Word = word.Word.Replace("'", "''");
                         }
 
                         var sql = "INSERT INTO dbo.Word (Word, PartOfSpeech, Number) " +
-                                  $"VALUES (N'{word.BaseWord}', '{word.PartOfSpeech}', '{word.Number}')";
+                                  $"VALUES (N'{word.Word}', '{word.PartOfSpeech}', '{word.Number}')";
 
                         using (SqlCommand command = new SqlCommand(sql, connection))
                         {
@@ -297,17 +291,17 @@ namespace AnagramSolver.BusinessLogic
                         lastWord = word;
                     }
 
-                    Word word2 = new Word { BaseWord = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
+                    WordModel word2 = new WordModel { Word = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                    if ((word2.BaseWord != word.BaseWord)
-                        || (word2.BaseWord == word.BaseWord && word2.PartOfSpeech != word.PartOfSpeech))
+                    if ((word2.Word != word.Word)
+                        || (word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech))
                     {
-                        if (word2.BaseWord.Contains("'"))
+                        if (word2.Word.Contains("'"))
                         {
-                            word2.BaseWord = word2.BaseWord.Replace("'", "''");
+                            word2.Word = word2.Word.Replace("'", "''");
                         }
                         var sql = "INSERT INTO dbo.Word (Word, PartOfSpeech, Number) " +
-                                  $"VALUES (N'{word2.BaseWord}', '{word2.PartOfSpeech}', '{word2.Number}')";
+                                  $"VALUES (N'{word2.Word}', '{word2.PartOfSpeech}', '{word2.Number}')";
 
                         using (SqlCommand command = new SqlCommand(sql, connection))
                         {

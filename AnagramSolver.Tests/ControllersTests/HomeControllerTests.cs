@@ -69,7 +69,7 @@ namespace AnagramSolver.Tests.ControllersTests
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
             ViewResult viewResult = (ViewResult)result;
-            Assert.IsAssignableFrom<PaginatedList<Word>>(viewResult.ViewData.Model);
+            Assert.IsAssignableFrom<PaginatedList<WordModel>>(viewResult.ViewData.Model);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace AnagramSolver.Tests.ControllersTests
         {
             var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
             controller.ModelState.AddModelError("BaseWord", "Required");
-            var word = new Word();
+            var word = new WordModel();
 
             var result = controller.CreateWord(word);
 
@@ -87,9 +87,9 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public void CreateWord_WhenWordAlreadyExists_ReturnsBadRequestResult()
         {
-            var word = new Word
+            var word = new WordModel
             {
-                BaseWord = "balas",
+                Word = "balas",
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
@@ -105,9 +105,9 @@ namespace AnagramSolver.Tests.ControllersTests
         public void CreateWord_WhenInputIsVlaid_ReturnsARedirectAndAddsSession()
         { 
             var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
-            var word = new Word
+            var word = new WordModel
             {
-                BaseWord = "balas",
+                Word = "balas",
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
@@ -118,19 +118,19 @@ namespace AnagramSolver.Tests.ControllersTests
             _wordRepository.Verify();
         }
 
-        private HashSet<Word> GetSampleWords()
+        private HashSet<WordModel> GetSampleWords()
         {
-            HashSet<Word> output = new HashSet<Word>
+            HashSet<WordModel> output = new HashSet<WordModel>
             {
-                new Word
+                new WordModel
                 {
-                    BaseWord = "balas",
+                    Word = "balas",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "labas",
+                    Word = "labas",
                     Number = 1,
                     PartOfSpeech = "bdv"
                 }

@@ -8,9 +8,10 @@ namespace AnagramSolver.Contracts.Models
 {
     public class SearchHistory
     {
-        public string? IpAddress { get; set; }
-        public int TimeSpent { get; set; }
-        public string? SearchWord { get; set; }
-        public string? Anagrams { get; set; }
+        public int Id { get; set; }
+        public string IpAddress { get; set; } = null!;
+        public int? TimeSpent { get; set; }
+        public string SearchWord { get; set; } = null!;
+        public string Anagrams { get; set; } = null!;
     }
 }

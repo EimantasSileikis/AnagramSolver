@@ -65,20 +65,6 @@ namespace AnagramSolver.BusinessLogic
             return new List<string>();
         }
 
-        public async Task<List<string>> RequestAnagrams(string myWords)
-        {
-            using (var client = new HttpClient())
-            {
-                var responseBody = await client.GetStringAsync($"{url}{myWords}");
-                var anagrams = JsonConvert.DeserializeObject<List<string>>(responseBody);
-
-                if(anagrams != null)
-                    return anagrams;
-            }
-
-            return new List<string>();
-        }
-
         private IEnumerable<string> FindAnagrams(string myWords)
         {
             string[] wordsArray = myWords.Split(" ");
@@ -90,10 +76,10 @@ namespace AnagramSolver.BusinessLogic
             {
                 var query =
                     words
-                    .Where(word => word.BaseWord.Replace(" ", "").ToLower() != myWords
-                    && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
+                    .Where(word => word.Word.Replace(" ", "").ToLower() != myWords
+                    && string.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
 
-                return query.Select(x => x.BaseWord).Distinct();
+                return query.Select(x => x.Word).Distinct();
             }
             else
             {
@@ -103,28 +89,28 @@ namespace AnagramSolver.BusinessLogic
             }
         }
 
-        private IList<string> FindAnagramsWithFewWords(HashSet<Word> words, string[] wordsArr, string orderedWordChars, string myWords)
+        private IList<string> FindAnagramsWithFewWords(HashSet<WordModel> words, string[] wordsArr, string orderedWordChars, string myWords)
         {
             IList<string> anagramList = new List<string>();
 
             var dktWords = words
                 .Where(word => (word.PartOfSpeech == "dkt")
-                && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
+                && String.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
 
             var bdvWords = words
                 .Where(word => (word.PartOfSpeech == "bdv")
-                && String.Concat(word.BaseWord.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
+                && String.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
 
             foreach (var bdvWord in bdvWords)
             {
                 foreach (var dktWord in dktWords)
                 {
-                    if (bdvWord.BaseWord.Length + dktWord.BaseWord.Length == orderedWordChars.Length
-                        && String.Concat((bdvWord.BaseWord + dktWord.BaseWord).OrderBy(c => c)).Equals(orderedWordChars)
-                        && (bdvWord.BaseWord + dktWord.BaseWord) != myWords
-                        && !wordsArr.Contains(dktWord.BaseWord) && !wordsArr.Contains(bdvWord.BaseWord))
+                    if (bdvWord.Word.Length + dktWord.Word.Length == orderedWordChars.Length
+                        && String.Concat((bdvWord.Word + dktWord.Word).OrderBy(c => c)).Equals(orderedWordChars)
+                        && (bdvWord.Word + dktWord.Word) != myWords
+                        && !wordsArr.Contains(dktWord.Word) && !wordsArr.Contains(bdvWord.Word))
                     {
-                        anagramList.Add(bdvWord.BaseWord + " " + dktWord.BaseWord);
+                        anagramList.Add(bdvWord.Word + " " + dktWord.Word);
                     }
                 }
             }

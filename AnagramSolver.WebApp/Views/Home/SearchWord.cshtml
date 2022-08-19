@@ -1,5 +1,5 @@
 ﻿@using AnagramSolver.Contracts.Models
-@model List<Word>
+@model List<WordModel>
 
 <h5>Search for word</h5>
 <form asp-action="SearchWord" method="get">
@@ -16,7 +16,7 @@
     <ul>
         @foreach (var item in Model)
         {
-            <li>@item.BaseWord @item.PartOfSpeech @item.Number</li>
+            <li>@item.Word @item.PartOfSpeech @item.Number</li>
         }
     </ul>
 
