@@ -31,7 +31,7 @@ namespace AnagramSolver.WebApp.Controllers
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var data = await _anagramSolver.GetAnagramsAsync(word);
+            IEnumerable<string> data = await _anagramSolver.GetAnagramsAsync(word);
             stopwatch.Stop();
             await _unitOfWork.SearchHistory
                 .AddAsync(new SearchHistory

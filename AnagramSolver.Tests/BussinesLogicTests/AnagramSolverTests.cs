@@ -9,7 +9,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
 {
     public class AnagramSolverTests
     {
-        Mock<IUnitOfWork> _unitOfWork;
+        Mock<IWordRepository> _wordRepository;
         IConfiguration _configuration;
         BusinessLogic.Core.AnagramSolver anagramSolver;
 
@@ -22,11 +22,10 @@ namespace AnagramSolver.Tests.BussinesLogicTests
                 .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
                 .Build();
 
-            _unitOfWork = new Mock<IUnitOfWork>();
-            _unitOfWork.Setup(x => x.Words.GetAllAsync()).ReturnsAsync(GetSampleWords());
-            _unitOfWork.Setup(x => x.CachedWords.WordExists(It.IsAny<string>())).Returns(false);
+            _wordRepository = new Mock<IWordRepository>();
+            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
 
-            anagramSolver = new BusinessLogic.Core.AnagramSolver(_unitOfWork.Object, _configuration);
+            anagramSolver = new BusinessLogic.Core.AnagramSolver(_wordRepository.Object, _configuration);
         }
 
         [TestCase("solo", "Oslo")]

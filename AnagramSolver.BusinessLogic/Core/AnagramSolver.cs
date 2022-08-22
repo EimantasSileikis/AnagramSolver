@@ -55,7 +55,7 @@ namespace AnagramSolver.BusinessLogic.Core
             return new List<string>();
         }
 
-        private async Task<IEnumerable<string>> FindAnagrams(string myWords)
+        private Task<IEnumerable<string>> FindAnagrams(string myWords)
         {
             string[] wordsArray = myWords.Split(" ");
             var words = _wordRepository.LoadDictionary();
@@ -69,13 +69,13 @@ namespace AnagramSolver.BusinessLogic.Core
                     .Where(word => word.Word.Replace(" ", "").ToLower() != myWords
                     && string.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).Equals(orderedWordChars));
 
-                return query.Select(x => x.Word).Distinct();
+                return Task.FromResult(query.Select(x => x.Word).Distinct());
             }
             else
             {
                 var anagramList = FindAnagramsWithFewWords(words, wordsArray, orderedWordChars, myWords);
 
-                return anagramList.Distinct();
+                return Task.FromResult(anagramList.Distinct());
             }
         }
 
