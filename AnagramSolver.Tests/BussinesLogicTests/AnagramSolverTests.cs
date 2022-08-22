@@ -1,4 +1,5 @@
-using AnagramSolver.Contracts.Interfaces;
+using AnagramSolver.Contracts.Interfaces.Core;
+using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -8,9 +9,9 @@ namespace AnagramSolver.Tests.BussinesLogicTests
 {
     public class AnagramSolverTests
     {
-        Mock<IDbWordRepository> _wordRepository;
+        Mock<IUnitOfWork> _unitOfWork;
         IConfiguration _configuration;
-        BusinessLogic.AnagramSolver anagramSolver;
+        BusinessLogic.Core.AnagramSolver anagramSolver;
 
         [SetUp]
         public void Setup()
@@ -21,58 +22,57 @@ namespace AnagramSolver.Tests.BussinesLogicTests
                 .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
                 .Build();
 
-            _wordRepository = new Mock<IDbWordRepository>();
-            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
+            _unitOfWork = new Mock<IUnitOfWork>();
+            _unitOfWork.Setup(x => x.Words.GetAllAsync()).ReturnsAsync(GetSampleWords());
+            _unitOfWork.Setup(x => x.CachedWords.WordExists(It.IsAny<string>())).Returns(false);
 
-            anagramSolver = new BusinessLogic.AnagramSolver(_wordRepository.Object, _configuration);
+            anagramSolver = new BusinessLogic.Core.AnagramSolver(_unitOfWork.Object, _configuration);
         }
 
         [TestCase("solo", "Oslo")]
         [TestCase("Oslo", "solo")]
-        public void GetAnagrams_CapitalLettersInInputOrDictionary_ReturnsAllResults(string input, string expectedResult)
+        public async Task GetAnagrams_CapitalLettersInInputOrDictionary_ReturnsAllResults(string input, string expectedResult)
         {
             var expected = new List<string> { expectedResult };
 
-            var result = anagramSolver.GetAnagrams(input);
+            var result = await anagramSolver.GetAnagramsAsync(input);
 
             Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
-        public void GetAnagrams_OneInputWords_ReturnsAnagramsWithOneWord()
+        public async Task GetAnagrams_OneInputWords_ReturnsAnagramsWithOneWord()
         {
             var expected = new List<string> { "balas" };
 
-            var result = anagramSolver.GetAnagrams("labas");
+            var result = await anagramSolver.GetAnagramsAsync("labas");
 
             Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
-        public void GetAnagrams_FewInputWords_ReturnsListWithStringPairs()
+        public async Task GetAnagrams_FewInputWords_ReturnsListWithStringPairs()
         {
             var expected = new List<string> { "tyras balas" };
-
-            var result = anagramSolver.GetAnagrams("la bas rytas");
+            var result = await anagramSolver.GetAnagramsAsync("la bas rytas");
 
             Assert.That(result, Is.EquivalentTo(expected));
         }
 
         [Test]
-        public void GetAnagrams_FindsMoreAnagramsThanMax_ReturnsListWithSpecifiedCount()
+        public async Task GetAnagrams_FindsMoreAnagramsThanMax_ReturnsListWithSpecifiedCount()
         {
-
-            var result = anagramSolver.GetAnagrams("tops");
+            var result = await anagramSolver.GetAnagramsAsync("tops");
 
             Assert.That(result.Count, Is.EqualTo(_configuration.GetValue<int>("MaxAnagrams")));
         }
 
         [Test]
-        public void GetAnagrams_FindsLessAnagramsThanMax_ReturnsListWithAllSolutions()
+        public async Task GetAnagrams_FindsLessAnagramsThanMax_ReturnsListWithAllSolutions()
         {
             var expected = new List<string> { "Oslo", "solo" };
 
-            var result = anagramSolver.GetAnagrams("loso");
+            var result = await anagramSolver.GetAnagramsAsync("loso");
 
             Assert.That(result.Count, Is.EqualTo(expected.Count));
         }

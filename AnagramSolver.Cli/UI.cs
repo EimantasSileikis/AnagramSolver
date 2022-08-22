@@ -1,4 +1,4 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Core;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
@@ -56,7 +56,7 @@ namespace AnagramSolver.Cli
 
         private void StartLookingForAnagrams(int selection)
         {
-            IList<string> anagrams;
+            IEnumerable<string> anagrams;
             Console.Write("Your input: ");
             var input = Console.ReadLine();
 
@@ -65,7 +65,9 @@ namespace AnagramSolver.Cli
 
             if (selection == 1)
             {
-                anagrams = _anagramSolver.GetAnagrams(input);
+                var task =  _anagramSolver.GetAnagramsAsync(input);
+                task.Wait();
+                anagrams = task.Result;
             }
             else
             {
@@ -77,9 +79,9 @@ namespace AnagramSolver.Cli
             StartApp();
         }
 
-        private void PrintAnagrams(IList<string> anagrams)
+        private void PrintAnagrams(IEnumerable<string> anagrams)
         {
-            if (anagrams.Count > 0)
+            if (anagrams.Count() > 0)
             {
                 Console.WriteLine("\nAnagrams:");
 

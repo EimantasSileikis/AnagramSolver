@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.EF.CodeFirst.Models
+namespace AnagramSolver.Contracts.Models
 {
-    public class CachedWordEntity
+    public class Anagram
     {
         public int Id { get; set; }
         public string Word { get; set; } = null!;
-        public ICollection<AnagramsEntity> Anagrams { get; set; }
+        public int CachedWordId { get; set; }
+        public virtual CachedWord? CachedWord { get; set; }
     }
 }

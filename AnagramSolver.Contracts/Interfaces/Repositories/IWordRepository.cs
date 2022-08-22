@@ -1,12 +1,11 @@
 ﻿using AnagramSolver.Contracts.Models;
 
-namespace AnagramSolver.Contracts.Interfaces
+namespace AnagramSolver.Contracts.Interfaces.Repositories
 {
     public interface IWordRepository
     {
-        HashSet<WordModel> Words { get; set; }
         HashSet<WordModel> LoadDictionary();
         bool WordExists(WordModel word);
-        void AddWord(WordModel word);
+        void SaveWord(WordModel word);
     }
 }

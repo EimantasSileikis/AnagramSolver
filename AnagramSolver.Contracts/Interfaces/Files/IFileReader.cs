@@ -1,4 +1,4 @@
-﻿namespace AnagramSolver.Contracts.Interfaces
+﻿namespace AnagramSolver.Contracts.Interfaces.Files
 {
     public interface IFileReader
     {

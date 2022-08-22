@@ -1,20 +1,18 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Files;
+using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 
-namespace AnagramSolver.BusinessLogic
+namespace AnagramSolver.BusinessLogic.Repositories
 {
     public class WordRepository : IWordRepository
     {
         public string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), "zodynas.txt");
-        private readonly IFileReader _fileReader;
-        private readonly IFileWriter _fileWriter;
+        private readonly IFileManager _fileManager;
 
         public HashSet<WordModel> Words { get; set; }
-
-        public WordRepository(IFileReader fileReader, IFileWriter fileWriter)
+        public WordRepository(IFileManager fileManager)
         {
-            _fileReader = fileReader;
-            _fileWriter = fileWriter;
+            _fileManager = fileManager;
             Words = LoadDictionary();
         }
 
@@ -22,8 +20,8 @@ namespace AnagramSolver.BusinessLogic
         {
             var wordSet = new HashSet<WordModel>();
 
-            var lines = _fileReader.ReadFile(dictionaryPath);
-            WordModel? lastWord = null; 
+            var lines = _fileManager.ReadFile(dictionaryPath);
+            WordModel? lastWord = null;
 
             foreach (var line in lines)
             {
@@ -31,8 +29,8 @@ namespace AnagramSolver.BusinessLogic
 
                 WordModel word = new WordModel { Word = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                if((lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech) 
-                    || (lastWord == null) || (lastWord != null && lastWord.Word != word.Word) )
+                if (lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech
+                    || lastWord == null || lastWord != null && lastWord.Word != word.Word)
                 {
                     wordSet.Add(word);
                     lastWord = word;
@@ -40,8 +38,8 @@ namespace AnagramSolver.BusinessLogic
 
                 WordModel word2 = new WordModel { Word = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                if ((word2.Word != word.Word) 
-                    || (word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech) )
+                if (word2.Word != word.Word
+                    || word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech)
                 {
                     wordSet.Add(word2);
                 }
@@ -52,15 +50,15 @@ namespace AnagramSolver.BusinessLogic
 
         public bool WordExists(WordModel word)
         {
-            return Words.Contains(word);
+            return Words.Any(w => w.Word == word.Word && w.PartOfSpeech == word.PartOfSpeech);
         }
 
-        public void AddWord(WordModel word)
+        public void SaveWord(WordModel word)
         {
-            if(word != null)
+            if (word != null)
             {
+                _fileManager.WriteLine(dictionaryPath, word.ToString() ?? "");
                 Words.Add(word);
-                _fileWriter.WriteLine(dictionaryPath, word.ToString() ?? "");
             }
         }
     }

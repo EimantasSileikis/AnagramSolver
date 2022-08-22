@@ -1,6 +1,9 @@
-﻿using AnagramSolver.BusinessLogic;
+﻿using AnagramSolver.BusinessLogic.Files;
+using AnagramSolver.BusinessLogic.Repositories;
 using AnagramSolver.Cli;
-using AnagramSolver.Contracts.Interfaces;
+using AnagramSolver.Contracts.Interfaces.Core;
+using AnagramSolver.Contracts.Interfaces.Files;
+using AnagramSolver.Contracts.Interfaces.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,15 +16,14 @@ builder.Build();
 var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
-        services.AddSingleton<IFileReader, FileReader>();
-        services.AddSingleton<IFileWriter, FileWriter>();
-        services.AddSingleton<IWordRepository, DbWordRepository>();
-        services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.AnagramSolver>();
+        services.AddSingleton<IFileManager, FileManager>();
+        services.AddSingleton<IWordRepository, WordRepository>();
+        services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.Core.AnagramSolver>();
         services.AddSingleton<UI>();
     })
     .Build();
 
-var anagramSolver = ActivatorUtilities.CreateInstance<AnagramSolver.BusinessLogic.AnagramSolver>(host.Services);
+var anagramSolver = ActivatorUtilities.CreateInstance<AnagramSolver.BusinessLogic.Core.AnagramSolver>(host.Services);
 var appUI = ActivatorUtilities.CreateInstance<UI>(host.Services);
 
 static void BuildConfig(IConfigurationBuilder builder)
