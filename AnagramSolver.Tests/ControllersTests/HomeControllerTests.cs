@@ -4,7 +4,9 @@ using AnagramSolver.WebApp.Controllers;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Text;
 
 namespace AnagramSolver.Tests.ControllersTests
 {
@@ -12,10 +14,17 @@ namespace AnagramSolver.Tests.ControllersTests
     {
         Mock<IAnagramSolver> _anagramSolver;
         Mock<IUnitOfWork> _unitOfWork;
+        IConfiguration _configuration;
 
         [SetUp]
         public void Setup()
         {
+            var appSettings = "{\"MinWordLength\": 1,\"MaxAnagrams\": 3}";
+
+            _configuration = new ConfigurationBuilder()
+                .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
+                .Build();
+
             _anagramSolver = new Mock<IAnagramSolver>();
             _unitOfWork = new Mock<IUnitOfWork>();
         }
@@ -25,7 +34,7 @@ namespace AnagramSolver.Tests.ControllersTests
         {
             _anagramSolver.Setup(x => x.GetAnagramsAsync("abc")).ReturnsAsync(new List<string> { "bac", "cab" });
             _unitOfWork.Setup(x => x.SearchHistory.AddAsync(It.IsAny<SearchHistory>()));
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -46,7 +55,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task Index_InputIsNullOrEmpty_ReturnsAEmptyViewResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
 
             var result = await controller.Index("");
 
@@ -61,7 +70,7 @@ namespace AnagramSolver.Tests.ControllersTests
             var list = new HashSet<WordModel> { new WordModel { Word = "abc", PartOfSpeech = "dkt", Number = 1 } };
             _unitOfWork.Setup(x => x.Words.GetAllAsync()).ReturnsAsync(list);
 
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
 
             var result = await controller.Anagrams(null);
 
@@ -73,7 +82,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task CreateWord_WhenModelStateIsInvalid_ReturnsBadRequestResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
             controller.ModelState.AddModelError("BaseWord", "Required");
             var word = new WordModel();
 
@@ -92,7 +101,7 @@ namespace AnagramSolver.Tests.ControllersTests
                 PartOfSpeech = "dkt"
             };
             _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(true);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
 
             var result = await controller.CreateWord(word);
 
@@ -109,8 +118,7 @@ namespace AnagramSolver.Tests.ControllersTests
                 PartOfSpeech = "dkt"
             };
             _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(false);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
-            
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
 
             var result = await controller.CreateWord(word);
 

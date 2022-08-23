@@ -18,11 +18,6 @@ namespace AnagramSolver.BusinessLogic.Repositories
         {
         }
 
-        public bool WordExists(string word)
-        {
-            return CodeFirstContext.CachedWords.Any(x => x.Word == word);
-        }
-
         public IEnumerable<string> GetCachedWordWithAnagrams(string word)
         {
             return CodeFirstContext.CachedWords.Include(c => c.Anagrams)
