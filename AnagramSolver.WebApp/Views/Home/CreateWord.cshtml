@@ -1,5 +1,5 @@
 ﻿@using AnagramSolver.Contracts.Models
-@model Word
+@model WordModel
 
 <h1>Create</h1>
 
@@ -10,9 +10,9 @@
         <form asp-action="CreateWord">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div>
-            <label asp-for="BaseWord">Word</label>
-            <input asp-for="BaseWord" class="form-control" />
-            <span asp-validation-for="BaseWord" class="text-danger"></span>
+            <label asp-for="Word">Word</label>
+            <input asp-for="Word" class="form-control" />
+            <span asp-validation-for="Word" class="text-danger"></span>
         </div>
         <div>
             <label asp-for="PartOfSpeech" class="control-label">Part of speech</label>

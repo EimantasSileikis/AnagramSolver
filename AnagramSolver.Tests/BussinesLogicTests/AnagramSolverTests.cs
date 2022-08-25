@@ -77,61 +77,61 @@ namespace AnagramSolver.Tests.BussinesLogicTests
             Assert.That(result.Count, Is.EqualTo(expected.Count));
         }
 
-        private HashSet<Word> GetSampleWords()
+        private HashSet<WordModel> GetSampleWords()
         {
-            HashSet<Word> output = new HashSet<Word>
+            HashSet<WordModel> output = new HashSet<WordModel>
             {
-                new Word
+                new WordModel
                 {
-                    BaseWord = "balas",
+                    Word = "balas",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "labas",
+                    Word = "labas",
                     Number = 1,
                     PartOfSpeech = "bdv"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "Oslo",
+                    Word = "Oslo",
                     Number = 1,
                     PartOfSpeech = "tikr. dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "solo",
+                    Word = "solo",
                     Number = 1,
                     PartOfSpeech = "bdv"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "tyras",
+                    Word = "tyras",
                     Number = 1,
                     PartOfSpeech = "bdv"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "stop",
+                    Word = "stop",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "post",
+                    Word = "post",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "pots",
+                    Word = "pots",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 },
-                new Word
+                new WordModel
                 {
-                    BaseWord = "spot",
+                    Word = "spot",
                     Number = 1,
                     PartOfSpeech = "dkt"
                 }

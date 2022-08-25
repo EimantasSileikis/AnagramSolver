@@ -33,7 +33,7 @@ namespace AnagramSolver.WebApp.Controllers
 
             var data = _anagramSolver.GetAnagrams(word);
             stopwatch.Stop();
-            _wordRepository.StoreSearchData(remoteIpAddress, word, data.ToList(), (int)stopwatch.ElapsedMilliseconds);
+            _wordRepository.StoreSearchData(remoteIpAddress ?? "", word, data.ToList(), (int)stopwatch.ElapsedMilliseconds);
 
             return View(data);
         }
@@ -43,7 +43,7 @@ namespace AnagramSolver.WebApp.Controllers
             var data = _wordRepository.LoadDictionary();
             int pageSize = 100;
 
-            return View(PaginatedList<Word>.Create(data, pageNumber ?? 1, pageSize));
+            return View(PaginatedList<WordModel>.Create(data, pageNumber ?? 1, pageSize));
         }
 
         public IActionResult SearchWord(string? word)
@@ -67,16 +67,16 @@ namespace AnagramSolver.WebApp.Controllers
 
         [HttpPost]
         public IActionResult CreateWord(
-            [Bind("BaseWord,PartOfSpeech,Number")] Word word)
+            [Bind("Word,PartOfSpeech,Number")] WordModel wordModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var condition = !_wordRepository.WordExists(word);
+            var condition = !_wordRepository.WordExists(wordModel);
             if (condition)
             {
-                _wordRepository.AddWord(word);
+                _wordRepository.AddWord(wordModel);
                 return RedirectToAction(nameof(Index));
             }
             else
