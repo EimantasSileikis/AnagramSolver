@@ -1,0 +1,23 @@
+﻿@using AnagramSolver.Contracts.Models
+@model List<Word>
+
+<h5>Search for word</h5>
+<form asp-action="SearchWord" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Input: <input id="word-input" type="text" name="word" />
+            <button type="submit" class="btn btn-primary">Find</button>
+        </p>
+    </div>
+</form>
+
+@if (Model != null)
+{
+    <ul>
+        @foreach (var item in Model)
+        {
+            <li>@item.BaseWord @item.PartOfSpeech @item.Number</li>
+        }
+    </ul>
+
+}

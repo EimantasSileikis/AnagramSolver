@@ -2,6 +2,7 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Controllers;
 using AnagramSolver.WebApp.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
@@ -15,13 +16,13 @@ namespace AnagramSolver.Tests.ControllersTests
     public class HomeControllerTests
     {
         Mock<IAnagramSolver> _anagramSolver;
-        Mock<IWordRepository> _wordRepository;
+        Mock<IDbWordRepository> _wordRepository;
 
         [SetUp]
         public void Setup()
         {
             _anagramSolver = new Mock<IAnagramSolver>();
-            _wordRepository = new Mock<IWordRepository>();
+            _wordRepository = new Mock<IDbWordRepository>();
         }
 
         [Test]
@@ -29,7 +30,16 @@ namespace AnagramSolver.Tests.ControllersTests
         {
             _anagramSolver.Setup(x => x.GetAnagrams("abc")).Returns(new List<string> { "bac", "cab" });
             var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
-
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    Connection =
+                {
+                    RemoteIpAddress = new System.Net.IPAddress(16885952)
+                }
+                }
+            };
             var result = controller.Index("abc");
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -50,9 +60,9 @@ namespace AnagramSolver.Tests.ControllersTests
         }
 
         [Test]
-        public void Anagrams_WithAHashSetWithWords_ReturnsAViewResult()
+        public void Anagrams_WithAHashSet_ReturnsAViewResult()
         {
-            _wordRepository.Setup(x => x.Words).Returns(GetSampleWords());
+            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
             var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
 
             var result = controller.Anagrams(null);

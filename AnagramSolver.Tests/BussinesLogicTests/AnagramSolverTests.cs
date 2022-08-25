@@ -8,7 +8,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
 {
     public class AnagramSolverTests
     {
-        Mock<IWordRepository> _wordRepository;
+        Mock<IDbWordRepository> _wordRepository;
         IConfiguration _configuration;
         BusinessLogic.AnagramSolver anagramSolver;
 
@@ -21,8 +21,8 @@ namespace AnagramSolver.Tests.BussinesLogicTests
                 .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
                 .Build();
 
-            _wordRepository = new Mock<IWordRepository>();
-            _wordRepository.Setup(x => x.Words).Returns(GetSampleWords());
+            _wordRepository = new Mock<IDbWordRepository>();
+            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
 
             anagramSolver = new BusinessLogic.AnagramSolver(_wordRepository.Object, _configuration);
         }

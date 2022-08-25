@@ -73,10 +73,7 @@ namespace AnagramSolver.Cli
                 task.Wait();
                 anagrams = task.Result;
             }
-            
-
             PrintAnagrams(anagrams);
-
             StartApp();
         }
 
