@@ -18,8 +18,11 @@ namespace AnagramSolver.BusinessLogic.Repositories
         {
         }
 
-        public IEnumerable<string> GetCachedWordWithAnagrams(string word)
+        public IEnumerable<string> GetCachedWordAnagrams(string word)
         {
+            var cachedWords = CodeFirstContext.CachedWords;
+            var include = cachedWords.Include(c => c.Anagrams);
+
             return CodeFirstContext.CachedWords.Include(c => c.Anagrams)
                 .Where(w => w.Word == word)
                 .SelectMany(w => w.Anagrams)

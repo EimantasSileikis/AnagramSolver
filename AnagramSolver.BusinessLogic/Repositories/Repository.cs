@@ -50,6 +50,7 @@ namespace AnagramSolver.BusinessLogic.Repositories
 
         public async Task<bool> Exist(Expression<Func<TEntity, bool>> predicate)
         {
+            var dfgdfg = Context.Set<TEntity>();
             return await Context.Set<TEntity>().AnyAsync(predicate);
         }
     }

@@ -10,6 +10,7 @@ namespace AnagramSolver.Contracts.Interfaces.Repositories
     public interface ISearchLimitRepository : IRepository<SearchLimit>
     {
         Task<SearchLimit?> GetByIpAsync(string ip);
+        Task<bool> ModifySearchLimit(string? ipAddress, uint increaseBy, uint seachLimit, bool checkSearchLimits = false);
     }
 
     

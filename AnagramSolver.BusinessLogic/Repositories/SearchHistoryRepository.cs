@@ -1,7 +1,6 @@
 ﻿using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace AnagramSolver.BusinessLogic.Repositories
 {

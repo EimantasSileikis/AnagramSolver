@@ -16,5 +16,37 @@ namespace AnagramSolver.BusinessLogic.Repositories
         {
             return await CodeFirstContext.SearchLimits.FirstOrDefaultAsync(limit => limit.Ip == ip);
         }
+
+        public async Task<bool> ModifySearchLimit(string? ipAddress, uint increaseBy, uint seachLimit, bool checkSearchLimits = false)
+        {
+            if (ipAddress == null)
+                return false;
+
+            if (await Exist(x => x.Ip == ipAddress))
+            {
+                var userByIp = await GetByIpAsync(ipAddress);
+
+                if (checkSearchLimits && CodeFirstContext.SearchHistories.Where(x => x.IpAddress == ipAddress).Count() >= userByIp?.Limit)
+                    return false;
+
+                if (userByIp != null)
+                {
+                    if (checkSearchLimits)
+                        userByIp.Limit -= increaseBy;
+                    else
+                        userByIp.Limit += increaseBy;
+                }
+            }
+            else
+            {
+                if (checkSearchLimits)
+                    await CodeFirstContext.SearchLimits.AddAsync(new SearchLimit
+                    { Ip = ipAddress, Limit = seachLimit - increaseBy });
+                else
+                    await CodeFirstContext.SearchLimits.AddAsync(new SearchLimit
+                    { Ip = ipAddress, Limit = seachLimit + increaseBy });
+            }
+            return true;
+        }
     }
 }

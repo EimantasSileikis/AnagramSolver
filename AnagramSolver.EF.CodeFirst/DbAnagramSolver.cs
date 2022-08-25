@@ -38,7 +38,7 @@ namespace AnagramSolver.EF.CodeFirst
 
             if (await _unitOfWork.CachedWords.Exist(x => x.Word == myWords))
             {
-                var anagrams = _unitOfWork.CachedWords.GetCachedWordWithAnagrams(myWords);
+                var anagrams = _unitOfWork.CachedWords.GetCachedWordAnagrams(myWords);
                 return anagrams.Take(maxAnagrams);
             }
             else

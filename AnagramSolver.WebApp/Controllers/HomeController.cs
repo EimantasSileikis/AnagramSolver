@@ -28,7 +28,16 @@ namespace AnagramSolver.WebApp.Controllers
 
             //Response.Cookies.Append("lastInput", word);
 
-            var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            string? ipAddress;
+
+            try
+            {
+                ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            }
+            catch (System.NullReferenceException ex)
+            {
+                return BadRequest();
+            }
 
             if (ipAddress == null)
                 return BadRequest();
@@ -87,12 +96,13 @@ namespace AnagramSolver.WebApp.Controllers
             [Bind("Word,PartOfSpeech,Number")] WordModel wordModel)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
             if (!_unitOfWork.Words.WordExists(wordModel))
             {
-                if(await ModifySearchLimit(1))
+                if (await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(), 
+                    1, _config.GetValue<uint>("SearchLimit")))
                 {
                     await _unitOfWork.Words.AddAsync(wordModel);
                     await _unitOfWork.CompleteAsync();
@@ -102,9 +112,7 @@ namespace AnagramSolver.WebApp.Controllers
                     return BadRequest("Could not create word");
             }
             else
-            {
                 return BadRequest("Word already exists");
-            }
         }
 
         public async Task<IActionResult> SearchHistory()
@@ -119,11 +127,12 @@ namespace AnagramSolver.WebApp.Controllers
         public async Task<IActionResult> DeleteWord(int id)
         {
             var word = await _unitOfWork.Words.GetAsync(id);
-            var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
-            if (word != null && ipAddress != null)
+            if (word != null)
             {
-                if(await ModifySearchLimit(1, true))
+                if(await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    1, _config.GetValue<uint>("SearchLimit"), true))
                 {
                     _unitOfWork.Words.Remove(word);
                     await _unitOfWork.CompleteAsync();
@@ -154,7 +163,9 @@ namespace AnagramSolver.WebApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if(await ModifySearchLimit(1))
+            if(await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    1, _config.GetValue<uint>("SearchLimit")))
             {
                 _unitOfWork.Words.Edit(wordModel);
                 await _unitOfWork.CompleteAsync();
@@ -164,37 +175,6 @@ namespace AnagramSolver.WebApp.Controllers
                 return BadRequest("Could not edit word");
         }
 
-        private async Task<bool> ModifySearchLimit(uint increaseBy, bool checkSearchLimits = false)
-        {
-            var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
-            if (ipAddress == null)
-                return false;
-
-            if (await _unitOfWork.SearchLimit.Exist(x => x.Ip == ipAddress))
-            {
-                var userIp = await _unitOfWork.SearchLimit.GetByIpAsync(ipAddress);
-
-                if (checkSearchLimits && _unitOfWork.SearchHistory.Find(x => x.IpAddress == ipAddress).Count() >= userIp?.Limit)
-                    return false;
-
-                if (userIp != null)
-                {
-                    if (checkSearchLimits)
-                        userIp.Limit -= increaseBy;
-                    else
-                        userIp.Limit += increaseBy;
-                }
-            }
-            else
-            {
-                if (checkSearchLimits)
-                    await _unitOfWork.SearchLimit.AddAsync(new SearchLimit
-                    { Ip = ipAddress, Limit = _config.GetValue<uint>("SearchLimit") - increaseBy });
-                else
-                    await _unitOfWork.SearchLimit.AddAsync(new SearchLimit
-                    { Ip = ipAddress, Limit = _config.GetValue<uint>("SearchLimit") + increaseBy });
-            }
-            return true;
-        }
+        
     }
 }
