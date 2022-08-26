@@ -1,23 +1,23 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace AnagramSolver.BusinessLogic
+namespace AnagramSolver.EF.CodeFirst
 {
-    public class AnagramSolver : IAnagramSolver
+    public class DbAnagramSolver : IAnagramSolver
     {
-        private readonly IDbWordRepository _wordRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _config;
         private readonly string url = "https://localhost:7127/api/anagrams/";
 
-        public AnagramSolver(IDbWordRepository wordRepository, IConfiguration config)
+        public DbAnagramSolver(IUnitOfWork unitOfWork, IConfiguration config)
         {
-            _wordRepository = wordRepository;
+            _unitOfWork = unitOfWork;
             _config = config;
         }
 
-        public IList<string> GetAnagrams(string myWords)
+        public async Task<IEnumerable<string>> GetAnagramsAsync(string myWords)
         {
             myWords = myWords.Trim();
             var words = myWords.Split(" ");
@@ -36,17 +36,25 @@ namespace AnagramSolver.BusinessLogic
 
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
 
-            if (_wordRepository.AnagramsFound(myWords))
+            if (_unitOfWork.CachedWords.WordExists(myWords))
             {
-                var anagrams = _wordRepository.GetCachedAnagrams(myWords);
-                return anagrams.Take(maxAnagrams).ToList();
+                var anagrams = _unitOfWork.CachedWords.GetCachedWordWithAnagrams(myWords);
+                return anagrams.Take(maxAnagrams);
             }
             else
             {
-                var anagrams = FindAnagrams(myWords);
-                _wordRepository.StoreToCachedTable(myWords, anagrams.ToList());
-                return anagrams.Take(maxAnagrams).ToList();
+                var anagrams = await FindAnagrams(myWords);
+                if (anagrams.Count() > 0)
+                {
+                    List<Anagram> anagramList = new List<Anagram>();
+                    anagrams.ToList().ForEach(word => anagramList.Add(new Anagram { Word = word }));
+                    await _unitOfWork.CachedWords.AddAsync(new CachedWord { Word = myWords, Anagrams = anagramList });
+                    await _unitOfWork.CompleteAsync();
+                }
+
+                return anagrams.Take(maxAnagrams);
             }
+
         }
 
         public async Task<List<string>> RequestAnagrams(string myWords)
@@ -63,12 +71,12 @@ namespace AnagramSolver.BusinessLogic
             return new List<string>();
         }
 
-        private IEnumerable<string> FindAnagrams(string myWords)
+        private async Task<IEnumerable<string>> FindAnagrams(string myWords)
         {
             string[] wordsArray = myWords.Split(" ");
-            var words = _wordRepository.LoadDictionary();
+            var words = await _unitOfWork.Words.GetAllAsync();
             myWords = myWords.Replace(" ", "").ToLower();
-            var orderedWordChars = String.Concat(myWords.OrderBy(c => c));
+            var orderedWordChars = string.Concat(myWords.OrderBy(c => c));
 
             if (wordsArray.Length < 2)
             {
@@ -87,25 +95,25 @@ namespace AnagramSolver.BusinessLogic
             }
         }
 
-        private IList<string> FindAnagramsWithFewWords(HashSet<WordModel> words, string[] wordsArr, string orderedWordChars, string myWords)
+        private IList<string> FindAnagramsWithFewWords(IEnumerable<WordModel> words, string[] wordsArr, string orderedWordChars, string myWords)
         {
             IList<string> anagramList = new List<string>();
 
             var dktWords = words
-                .Where(word => (word.PartOfSpeech == "dkt")
-                && String.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
+                .Where(word => word.PartOfSpeech == "dkt"
+                && string.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
 
             var bdvWords = words
-                .Where(word => (word.PartOfSpeech == "bdv")
-                && String.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
+                .Where(word => word.PartOfSpeech == "bdv"
+                && string.Concat(word.Word.Replace(" ", "").ToLower().OrderBy(c => c)).All(orderedWordChars.Contains));
 
             foreach (var bdvWord in bdvWords)
             {
                 foreach (var dktWord in dktWords)
                 {
                     if (bdvWord.Word.Length + dktWord.Word.Length == orderedWordChars.Length
-                        && String.Concat((bdvWord.Word + dktWord.Word).OrderBy(c => c)).Equals(orderedWordChars)
-                        && (bdvWord.Word + dktWord.Word) != myWords
+                        && string.Concat((bdvWord.Word + dktWord.Word).OrderBy(c => c)).Equals(orderedWordChars)
+                        && bdvWord.Word + dktWord.Word != myWords
                         && !wordsArr.Contains(dktWord.Word) && !wordsArr.Contains(bdvWord.Word))
                     {
                         anagramList.Add(bdvWord.Word + " " + dktWord.Word);

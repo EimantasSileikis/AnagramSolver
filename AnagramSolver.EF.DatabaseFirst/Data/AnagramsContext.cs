@@ -1,22 +1,32 @@
-﻿using AnagramSolver.Contracts.Models;
-using AnagramSolver.EF.DatabaseFirst.Models;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using AnagramSolver.EF.DatabaseFirst.Models;
 
 namespace AnagramSolver.EF.DatabaseFirst.Data
 {
     public partial class AnagramsContext : DbContext
     {
-        public AnagramsContext(DbContextOptions<AnagramsContext> options) : base(options) { }
+        public AnagramsContext()
+        {
+        }
+
+        public AnagramsContext(DbContextOptions<AnagramsContext> options)
+            : base(options)
+        {
+        }
 
         public virtual DbSet<Anagram> Anagrams { get; set; } = null!;
         public virtual DbSet<CachedWord> CachedWords { get; set; } = null!;
         public virtual DbSet<SearchHistory> SearchHistories { get; set; } = null!;
-        public virtual DbSet<WordModel> Words { get; set; } = null!;
+        public virtual DbSet<Word> Words { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
+                //To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=localhost;Database=Anagrams;Trusted_Connection=True;");
             }
         }
@@ -47,7 +57,7 @@ namespace AnagramSolver.EF.DatabaseFirst.Data
                 entity.Property(e => e.IpAddress).IsUnicode(false);
             });
 
-            modelBuilder.Entity<WordModel>(entity =>
+            modelBuilder.Entity<Word>(entity =>
             {
                 entity.ToTable("Word");
 
@@ -55,7 +65,7 @@ namespace AnagramSolver.EF.DatabaseFirst.Data
                     .HasMaxLength(255)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Word)
+                entity.Property(e => e.Word1)
                     .HasMaxLength(255)
                     .HasColumnName("Word");
             });

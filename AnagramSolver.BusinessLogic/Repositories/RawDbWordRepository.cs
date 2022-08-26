@@ -1,23 +1,24 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Files;
+using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace AnagramSolver.BusinessLogic
+namespace AnagramSolver.BusinessLogic.Repositories
 {
-    public class DbWordRepository : IDbWordRepository
+    public class RawDbWordRepository : IRawDbWordRepository
     {
         private readonly string dictionaryPath;
-        private readonly IFileReader _fileReader;
+        private readonly IFileManager _fileManager;
         private readonly IConfiguration _config;
         SqlConnectionStringBuilder builder;
 
         public HashSet<WordModel> Words { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public DbWordRepository(IFileReader fileReader, IConfiguration config)
+        public RawDbWordRepository(IFileManager fileManager, IConfiguration config)
         {
-            _fileReader = fileReader;
+            _fileManager = fileManager;
             _config = config;
             dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(),
                 _config.GetSection("DictionaryFilePath").Value);
@@ -42,7 +43,6 @@ namespace AnagramSolver.BusinessLogic
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     command.ExecuteNonQuery();
-                    //Words.Add(word);
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace AnagramSolver.BusinessLogic
         {
             return LoadDictionary().Contains(word);
         }
-        
+
         public List<WordModel> SearchWord(string word)
         {
             var words = new List<WordModel>();
@@ -137,7 +137,7 @@ namespace AnagramSolver.BusinessLogic
                         command.ExecuteNonQuery();
                     }
 
-                    foreach(var anagram in anagrams)
+                    foreach (var anagram in anagrams)
                     {
                         sql = "INSERT INTO dbo.Anagrams (Anagram, WordId) " +
                           $"VALUES (N'{anagram}', (SELECT Id FROM dbo.CachedWord WHERE Word = N'{inputWord}'))";
@@ -261,7 +261,7 @@ namespace AnagramSolver.BusinessLogic
 
         public void SeedDatabase()
         {
-            var lines = _fileReader.ReadFile(dictionaryPath);
+            var lines = _fileManager.ReadFile(dictionaryPath);
 
             WordModel? lastWord = null;
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -273,8 +273,8 @@ namespace AnagramSolver.BusinessLogic
 
                     WordModel word = new WordModel { Word = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                    if ((lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech)
-                        || (lastWord == null) || (lastWord != null && lastWord.Word != word.Word))
+                    if (lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech
+                        || lastWord == null || lastWord != null && lastWord.Word != word.Word)
                     {
                         if (word.Word.Contains("'"))
                         {
@@ -293,8 +293,8 @@ namespace AnagramSolver.BusinessLogic
 
                     WordModel word2 = new WordModel { Word = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                    if ((word2.Word != word.Word)
-                        || (word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech))
+                    if (word2.Word != word.Word
+                        || word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech)
                     {
                         if (word2.Word.Contains("'"))
                         {
@@ -310,7 +310,10 @@ namespace AnagramSolver.BusinessLogic
                     }
                 }
             }
-            
+        }
+        public void SaveWord(WordModel word)
+        {
+            throw new NotImplementedException();
         }
     }
 }

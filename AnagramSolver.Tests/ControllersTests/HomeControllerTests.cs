@@ -1,46 +1,42 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Controllers;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnagramSolver.Tests.ControllersTests
 {
     public class HomeControllerTests
     {
         Mock<IAnagramSolver> _anagramSolver;
-        Mock<IDbWordRepository> _wordRepository;
+        Mock<IUnitOfWork> _unitOfWork;
 
         [SetUp]
         public void Setup()
         {
             _anagramSolver = new Mock<IAnagramSolver>();
-            _wordRepository = new Mock<IDbWordRepository>();
+            _unitOfWork = new Mock<IUnitOfWork>();
         }
 
         [Test]
-        public void Index_WithInput_ReturnsAViewResult()
+        public async Task Index_WithInput_ReturnsAViewResult()
         {
-            _anagramSolver.Setup(x => x.GetAnagrams("abc")).Returns(new List<string> { "bac", "cab" });
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            _anagramSolver.Setup(x => x.GetAnagramsAsync("abc")).ReturnsAsync(new List<string> { "bac", "cab" });
+            _unitOfWork.Setup(x => x.SearchHistory.AddAsync(It.IsAny<SearchHistory>()));
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
                 {
                     Connection =
-                {
-                    RemoteIpAddress = new System.Net.IPAddress(16885952)
-                }
+                    {
+                        RemoteIpAddress = new System.Net.IPAddress(123456789)
+                    }
                 }
             };
-            var result = controller.Index("abc");
+            var result = await controller.Index("abc");
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
             ViewResult viewResult = (ViewResult)result;
@@ -48,11 +44,11 @@ namespace AnagramSolver.Tests.ControllersTests
         }
 
         [Test]
-        public void Index_InputIsNullOrEmpty_ReturnsAEmptyViewResult()
+        public async Task Index_InputIsNullOrEmpty_ReturnsAEmptyViewResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
 
-            var result = controller.Index("");
+            var result = await controller.Index("");
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
             ViewResult viewResult = (ViewResult)result;
@@ -60,12 +56,14 @@ namespace AnagramSolver.Tests.ControllersTests
         }
 
         [Test]
-        public void Anagrams_WithAHashSet_ReturnsAViewResult()
+        public async Task Anagrams_WithAHashSet_ReturnsAViewResult()
         {
-            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            var list = new HashSet<WordModel> { new WordModel { Word = "abc", PartOfSpeech = "dkt", Number = 1 } };
+            _unitOfWork.Setup(x => x.Words.GetAllAsync()).ReturnsAsync(list);
 
-            var result = controller.Anagrams(null);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+
+            var result = await controller.Anagrams(null);
 
             Assert.That(result, Is.InstanceOf<ViewResult>());
             ViewResult viewResult = (ViewResult)result;
@@ -73,19 +71,19 @@ namespace AnagramSolver.Tests.ControllersTests
         }
 
         [Test]
-        public void CreateWord_WhenModelStateIsInvalid_ReturnsBadRequestResult()
+        public async Task CreateWord_WhenModelStateIsInvalid_ReturnsBadRequestResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
             controller.ModelState.AddModelError("BaseWord", "Required");
             var word = new WordModel();
 
-            var result = controller.CreateWord(word);
+            var result = await controller.CreateWord(word);
 
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
-        public void CreateWord_WhenWordAlreadyExists_ReturnsBadRequestResult()
+        public async Task CreateWord_WhenWordAlreadyExists_ReturnsBadRequestResult()
         {
             var word = new WordModel
             {
@@ -93,50 +91,31 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _wordRepository.Setup(x => x.WordExists(word)).Returns(true);
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+            _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(true);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
 
-            var result = controller.CreateWord(word);
+            var result = await controller.CreateWord(word);
 
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
-        public void CreateWord_WhenInputIsVlaid_ReturnsARedirectAndAddsSession()
-        { 
-            var controller = new HomeController(_anagramSolver.Object, _wordRepository.Object);
+        public async Task CreateWord_WhenInputIsValid_ReturnsARedirectAndAddsWord()
+        {
             var word = new WordModel
             {
                 Word = "balas",
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
+            _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(false);
+            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object);
+            
 
-            var result = controller.CreateWord(word);
+            var result = await controller.CreateWord(word);
 
             Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-            _wordRepository.Verify();
-        }
-
-        private HashSet<WordModel> GetSampleWords()
-        {
-            HashSet<WordModel> output = new HashSet<WordModel>
-            {
-                new WordModel
-                {
-                    Word = "balas",
-                    Number = 1,
-                    PartOfSpeech = "dkt"
-                },
-                new WordModel
-                {
-                    Word = "labas",
-                    Number = 1,
-                    PartOfSpeech = "bdv"
-                }
-            };
-
-            return output;
+            _unitOfWork.Verify();
         }
     }
 }

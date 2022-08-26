@@ -1,4 +1,4 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers.Api
@@ -15,9 +15,9 @@ namespace AnagramSolver.WebApp.Controllers.Api
         }
 
         [HttpGet("{word}")]
-        public IList<string> GetAnagrams(string word)
+        public async Task<IEnumerable<string>> GetAnagrams(string word)
         {
-            var anagrams = _anagramSolver.GetAnagrams(word);
+            var anagrams = await _anagramSolver.GetAnagramsAsync(word);
 
             return anagrams;
         }

@@ -1,8 +1,8 @@
 ﻿using AnagramSolver.Contracts.Models;
 
-namespace AnagramSolver.Contracts.Interfaces
+namespace AnagramSolver.Contracts.Interfaces.Repositories
 {
-    public interface IDbWordRepository : IWordRepository
+    public interface IRawDbWordRepository : IWordRepository
     {
         List<WordModel> SearchWord(string word);
         bool StoreToCachedTable(string inputWord, List<string> anagrams);

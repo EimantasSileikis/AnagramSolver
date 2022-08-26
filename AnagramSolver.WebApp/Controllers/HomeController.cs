@@ -1,4 +1,4 @@
-﻿using AnagramSolver.Contracts.Interfaces;
+﻿using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,15 +10,15 @@ namespace AnagramSolver.WebApp.Controllers
     public class HomeController : Controller
     {
         private readonly IAnagramSolver _anagramSolver;
-        private readonly IDbWordRepository _wordRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public HomeController(IAnagramSolver anagramSolver, IDbWordRepository wordRepository)
+        public HomeController(IAnagramSolver anagramSolver, IUnitOfWork unitOfWork)
         {
             _anagramSolver = anagramSolver;
-            _wordRepository = wordRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index(string word)
+        public async Task<IActionResult> Index(string word)
         {
             //_wordRepository.DeleteTableData("SearchHistory");
 
@@ -31,30 +31,38 @@ namespace AnagramSolver.WebApp.Controllers
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var data = _anagramSolver.GetAnagrams(word);
+            IEnumerable<string> data = await _anagramSolver.GetAnagramsAsync(word);
             stopwatch.Stop();
-            _wordRepository.StoreSearchData(remoteIpAddress ?? "", word, data.ToList(), (int)stopwatch.ElapsedMilliseconds);
+            await _unitOfWork.SearchHistory
+                .AddAsync(new SearchHistory
+                {
+                    IpAddress = remoteIpAddress ?? "",
+                    SearchWord = word,
+                    Anagrams = string.Join(",", data.ToArray()),
+                    TimeSpent = (int)stopwatch.ElapsedMilliseconds
+                });
+            await _unitOfWork.CompleteAsync();
 
             return View(data);
         }
 
-        public IActionResult Anagrams(int? pageNumber)
+        public async Task<IActionResult> Anagrams(int? pageNumber)
         {
-            var data = _wordRepository.LoadDictionary();
             int pageSize = 100;
+            var data = await _unitOfWork.Words.GetAllAsync();
 
             return View(PaginatedList<WordModel>.Create(data, pageNumber ?? 1, pageSize));
         }
 
         public IActionResult SearchWord(string? word)
         {
-            if(word == null || word == string.Empty)
+            if (word == null || word == string.Empty)
             {
                 return View(null);
             }
             else
             {
-                var words = _wordRepository.SearchWord(word);
+                var words = _unitOfWork.Words.GetSearchWords(word);
 
                 return View(words);
             }
@@ -66,17 +74,18 @@ namespace AnagramSolver.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateWord(
+        public async Task<IActionResult> CreateWord(
             [Bind("Word,PartOfSpeech,Number")] WordModel wordModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var condition = !_wordRepository.WordExists(wordModel);
-            if (condition)
+            var wordExists = _unitOfWork.Words.WordExists(wordModel);
+            if (!wordExists)
             {
-                _wordRepository.AddWord(wordModel);
+                await _unitOfWork.Words.AddAsync(wordModel);
+                await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
             else
@@ -85,11 +94,13 @@ namespace AnagramSolver.WebApp.Controllers
             }
         }
 
-        public IActionResult SearchHistory()
+        public async Task<IActionResult> SearchHistory()
         {
-            var history = _wordRepository.GetSearchHistory();
+            var history = await _unitOfWork.SearchHistory.GetAllAsync();
+            if (history != null)
+                return View(history);
 
-            return View(history);
+            return new EmptyResult();
         }
     }
 }
