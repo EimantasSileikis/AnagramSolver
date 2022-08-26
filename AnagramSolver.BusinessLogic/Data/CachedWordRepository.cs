@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
 
     public class CachedWordRepository : Repository<CachedWord>, ICachedWordRepository

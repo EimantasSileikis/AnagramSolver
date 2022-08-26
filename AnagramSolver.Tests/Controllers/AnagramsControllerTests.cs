@@ -1,16 +1,17 @@
 ﻿using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.WebApp.Controllers.Api;
 using Moq;
+using NSubstitute;
 
-namespace AnagramSolver.Tests.ControllersTests
+namespace AnagramSolver.Tests.Controllers
 {
     public class AnagramsControllerTests
     {
         [Test]
         public async Task GetAnagrams_Always_ReturnsIEnumerableOfString()
         {
-            Mock<IAnagramSolver> _anagramSolver = new Mock<IAnagramSolver>();
-            var controller = new AnagramsController(_anagramSolver.Object);
+            IAnagramSolver _anagramSolver = Substitute.For<IAnagramSolver>();
+            var controller = new AnagramsController(_anagramSolver);
 
             var result = await controller.GetAnagrams("a");
 

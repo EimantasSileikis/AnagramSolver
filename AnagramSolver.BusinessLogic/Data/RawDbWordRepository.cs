@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class RawDbWordRepository : IRawDbWordRepository
     {

@@ -1,7 +1,7 @@
 ﻿using AnagramSolver.WebApp.Controllers.Api;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AnagramSolver.Tests.ControllersTests
+namespace AnagramSolver.Tests.Controllers
 {
     public class DownloadsControllerTests
     {

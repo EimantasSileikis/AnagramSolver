@@ -5,7 +5,7 @@ using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class DbWordRepository : Repository<WordModel>, IDbWordRepository
     {
@@ -36,8 +36,8 @@ namespace AnagramSolver.BusinessLogic.Repositories
 
                 WordModel word = new WordModel { Word = wordArr[0], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                if ((lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech)
-                    || (lastWord == null) || (lastWord != null && lastWord.Word != word.Word))
+                if (lastWord != null && lastWord.Word == word.Word && lastWord.PartOfSpeech != word.PartOfSpeech
+                    || lastWord == null || lastWord != null && lastWord.Word != word.Word)
                 {
                     if (word.Word.Contains("'"))
                     {
@@ -50,8 +50,8 @@ namespace AnagramSolver.BusinessLogic.Repositories
 
                 WordModel word2 = new WordModel { Word = wordArr[2], PartOfSpeech = wordArr[1], Number = int.Parse(wordArr[3]) };
 
-                if ((word2.Word != word.Word)
-                    || (word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech))
+                if (word2.Word != word.Word
+                    || word2.Word == word.Word && word2.PartOfSpeech != word.PartOfSpeech)
                 {
                     if (word2.Word.Contains("'"))
                     {

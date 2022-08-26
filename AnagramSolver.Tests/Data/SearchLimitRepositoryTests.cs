@@ -1,11 +1,12 @@
-﻿using AnagramSolver.BusinessLogic.Repositories;
+﻿using AnagramSolver.BusinessLogic.Data;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.EntityFrameworkCore;
-using MockQueryable.Moq;
+using MockQueryable.NSubstitute;
 using Moq;
+using NSubstitute;
 
-namespace AnagramSolver.Tests.BussinesLogicTests
+namespace AnagramSolver.Tests.Data
 {
     public class SearchLimitRepositoryTests
     {
@@ -13,16 +14,16 @@ namespace AnagramSolver.Tests.BussinesLogicTests
 
         [SetUp]
         public void SetUp()
-        { 
+        {
             var queryable = GetSampleData().AsQueryable();
-            var context = new Mock<CodeFirstContext>(new DbContextOptions<CodeFirstContext>());
+            var context = Substitute.For<CodeFirstContext>(new DbContextOptions<CodeFirstContext>());
             var searchLimitsDbSet = queryable.BuildMockDbSet();
             var searchHistoryDbSet = GetSearchHistoryData().AsQueryable().BuildMockDbSet();
-            searchLimitsDbSet.Setup(d => d.Add(It.IsAny<SearchLimit>())).Callback<SearchLimit>((s) => GetSampleData().Add(s));
-            context.Setup(x => x.Set<SearchLimit>()).Returns(searchLimitsDbSet.Object);
-            context.Setup(x => x.SearchLimits).Returns(searchLimitsDbSet.Object);
-            context.Setup(x => x.SearchHistories).Returns(searchHistoryDbSet.Object);
-            _repository = new SearchLimitRepository(context.Object);
+            context.Set<SearchLimit>().Returns(searchLimitsDbSet); 
+            context.SearchLimits.Returns(searchLimitsDbSet);
+            context.SearchHistories.Returns(searchHistoryDbSet);
+
+            _repository = new SearchLimitRepository(context);
         }
 
         [Test]

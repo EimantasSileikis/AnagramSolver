@@ -1,11 +1,10 @@
-﻿using AnagramSolver.BusinessLogic.Files;
-using AnagramSolver.BusinessLogic.Repositories;
+﻿using AnagramSolver.BusinessLogic.Services;
 using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.Extensions.Configuration;
 
-namespace AnagramSolver.BusinessLogic.Core
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class UnitOfWork : IUnitOfWork
     {

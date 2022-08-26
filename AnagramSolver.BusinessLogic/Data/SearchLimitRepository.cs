@@ -3,7 +3,7 @@ using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class SearchLimitRepository : Repository<SearchLimit>, ISearchLimitRepository
     {

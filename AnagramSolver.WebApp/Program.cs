@@ -1,4 +1,4 @@
-using AnagramSolver.BusinessLogic.Core;
+using AnagramSolver.BusinessLogic.Data;
 using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.EF.CodeFirst;
 using AnagramSolver.EF.CodeFirst.Data;

@@ -5,16 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.Tests.GenericTests
+namespace AnagramSolver.Tests.Services
 {
     public class GenericTests
     {
-        [SetUp]
-        public void SetUp()
-        {
-
-        }
-
         [TestCase(1, Gender.Male)]
         [TestCase(2, Gender.Female)]
         [TestCase(3, Gender.Other)]

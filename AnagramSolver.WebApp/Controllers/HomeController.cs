@@ -36,7 +36,7 @@ namespace AnagramSolver.WebApp.Controllers
             }
             catch (System.NullReferenceException ex)
             {
-                return BadRequest();
+                return BadRequest(ex);
             }
 
             if (ipAddress == null)

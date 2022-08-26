@@ -1,10 +1,11 @@
-﻿using AnagramSolver.BusinessLogic.Repositories;
+﻿using AnagramSolver.BusinessLogic.Data;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.EntityFrameworkCore;
-using Moq;
+using NSubstitute;
+using MockQueryable.NSubstitute;
 
-namespace AnagramSolver.Tests.BussinesLogicTests
+namespace AnagramSolver.Tests.Data
 {
     public class CachedWordRepositoryTests
     {
@@ -13,23 +14,19 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         [SetUp]
         public void SetUp()
         {
-            
+
             var queryable = GetSampleData().AsQueryable();
 
-            var context = new Mock<CodeFirstContext>(new DbContextOptions<CodeFirstContext>());
-            var cachedWordsDbSet = new Mock<DbSet<CachedWord>>();
-            cachedWordsDbSet.As<IQueryable<CachedWord>>().Setup(m => m.Provider).Returns(queryable.Provider);
-            cachedWordsDbSet.As<IQueryable<CachedWord>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            cachedWordsDbSet.As<IQueryable<CachedWord>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            cachedWordsDbSet.As<IQueryable<CachedWord>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
-            context.Setup(x => x.CachedWords).Returns(cachedWordsDbSet.Object);
-            _repository = new CachedWordRepository(context.Object);
+            var context = Substitute.For<CodeFirstContext>(new DbContextOptions<CodeFirstContext>());
+            var cachedWordsDbSet = queryable.BuildMockDbSet();
+            context.CachedWords.Returns(cachedWordsDbSet);
+            _repository = new CachedWordRepository(context);
         }
 
         [Test]
         public void GetCachedWordAnagrams_CachedWordFound_ReturnsIEnumerableOfAnagrams()
         {
-            var expexted = new List<string?> {"tea", "eta"};
+            var expexted = new List<string?> { "tea", "eta" };
 
             var result = _repository.GetCachedWordAnagrams("ate");
 

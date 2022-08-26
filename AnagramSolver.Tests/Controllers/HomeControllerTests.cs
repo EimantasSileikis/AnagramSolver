@@ -8,13 +8,14 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Linq.Expressions;
 using System.Text;
+using NSubstitute;
 
-namespace AnagramSolver.Tests.ControllersTests
+namespace AnagramSolver.Tests.Controllers
 {
     public class HomeControllerTests
     {
-        Mock<IAnagramSolver> _anagramSolver;
-        Mock<IUnitOfWork> _unitOfWork;
+        IAnagramSolver _anagramSolver;
+        IUnitOfWork _unitOfWork;
         IConfiguration _configuration;
 
         [SetUp]
@@ -26,17 +27,17 @@ namespace AnagramSolver.Tests.ControllersTests
                 .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
                 .Build();
 
-            _anagramSolver = new Mock<IAnagramSolver>();
-            _unitOfWork = new Mock<IUnitOfWork>();
+            _anagramSolver = Substitute.For<IAnagramSolver>();
+            _unitOfWork = Substitute.For<IUnitOfWork>();
         }
 
         [Test]
         public async Task Index_WithInput_ReturnsAViewResult()
         {
-            _anagramSolver.Setup(x => x.GetAnagramsAsync("abc")).ReturnsAsync(new List<string> { "bac", "cab" });
-            _unitOfWork.Setup(x => x.SearchHistory.AddAsync(It.IsAny<SearchHistory>()));
-            _unitOfWork.Setup(x => x.SearchLimit.Exist(It.IsAny<Expression<Func<SearchLimit, bool>>>())).ReturnsAsync(true);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _anagramSolver.GetAnagramsAsync("abc").Returns(Task.FromResult(new List<string> { "bac", "cab" }.AsEnumerable()));
+            //_unitOfWork.Setup(x => x.SearchHistory.AddAsync(Arg.Any<SearchHistory>()));
+            _unitOfWork.SearchLimit.Exist(Arg.Any<Expression<Func<SearchLimit, bool>>>()).Returns(Task.FromResult(true));
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -57,7 +58,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task Index_InputIsNullOrEmpty_ReturnsAEmptyViewResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = await controller.Index("");
 
@@ -69,21 +70,20 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task Index_IpAddressIsNull_ReturnsAEmptyViewResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = await controller.Index("a");
 
-            Assert.That(result, Is.InstanceOf<BadRequestResult>());
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
 
         [Test]
         public async Task Index_UserReachedSearchLimit_ReturnsAEmptyView()
         {
-            _unitOfWork.Setup(x => x.SearchLimit.Exist(It.IsAny<Expression<Func<SearchLimit, bool>>>())).ReturnsAsync(true);
-            _unitOfWork.Setup(x => x.SearchHistory
-                .Find(It.IsAny<Expression<Func<SearchHistory, bool>>>()))
-                .Returns(new List<SearchHistory>() { new SearchHistory(), new SearchHistory(), new SearchHistory() } );
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.SearchLimit.Exist(Arg.Any<Expression<Func<SearchLimit, bool>>>()).Returns(Task.FromResult(true));
+            _unitOfWork.SearchHistory.Find(Arg.Any<Expression<Func<SearchHistory, bool>>>())
+                .Returns(new List<SearchHistory>() { new SearchHistory(), new SearchHistory(), new SearchHistory() });
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -107,9 +107,9 @@ namespace AnagramSolver.Tests.ControllersTests
         public async Task Anagrams_WithAHashSet_ReturnsAViewResult()
         {
             var list = new HashSet<WordModel> { new WordModel { Word = "abc", PartOfSpeech = "dkt", Number = 1 } };
-            _unitOfWork.Setup(x => x.Words.GetAllAsync()).ReturnsAsync(list);
+            _unitOfWork.Words.GetAllAsync().Returns(Task.FromResult(list.AsEnumerable()));
 
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = await controller.Anagrams(null);
 
@@ -121,7 +121,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public void SearchWord_InputIsNullOrEmpty_ReturnsViewWithNullObject()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = controller.SearchWord(null);
 
@@ -133,8 +133,8 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public void SearchWord_ValidInput_ReturnsViewWithWords()
         {
-            _unitOfWork.Setup(x => x.Words.GetSearchWords(It.IsAny<string>())).Returns(new List<WordModel> { new WordModel() });
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.Words.GetSearchWords(Arg.Any<string>()).Returns(new List<WordModel> { new WordModel() });
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = controller.SearchWord("a");
 
@@ -146,7 +146,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task CreateWord_WhenModelStateIsInvalid_ReturnsBadRequestResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ModelState.AddModelError("BaseWord", "Required");
             var word = new WordModel();
 
@@ -164,8 +164,8 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(true);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.Words.WordExists(word).Returns(true);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = await controller.CreateWord(word);
 
@@ -181,12 +181,12 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(false);
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(false);
+            _unitOfWork.Words.WordExists(word).Returns(false);
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(false));
 
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -212,11 +212,11 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _unitOfWork.Setup(x => x.Words.WordExists(word)).Returns(false);
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(true);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.Words.WordExists(word).Returns(false);
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(true));
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -231,14 +231,13 @@ namespace AnagramSolver.Tests.ControllersTests
             var result = await controller.CreateWord(word);
 
             Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-            _unitOfWork.Verify();
+            _unitOfWork.Received();
         }
 
         [Test]
         public async Task Delete_WhenWordDoesNotExist_ReturnsBadRequestResult()
         {
-            _unitOfWork.Setup(x => x.Words.GetAsync(It.IsAny<int>())).ReturnsAsync(value: null);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
 
             var result = await controller.DeleteWord(0);
 
@@ -248,11 +247,11 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task Delete_SearchLimitReached_ReturnsBadRequestResult()
         {
-            _unitOfWork.Setup(x => x.Words.GetAsync(It.IsAny<int>())).ReturnsAsync(new WordModel());
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(false);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.Words.GetAsync(Arg.Any<int>()).Returns(Task.FromResult<WordModel?>(new WordModel()));
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(false));
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -272,11 +271,11 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task Delete_SearchLimitReached_ReturnsARedirectAndDeletesWord()
         {
-            _unitOfWork.Setup(x => x.Words.GetAsync(It.IsAny<int>())).ReturnsAsync(new WordModel());
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(true);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.Words.GetAsync(Arg.Any<int>()).Returns(Task.FromResult<WordModel?>(new WordModel()));
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(true));
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -296,7 +295,7 @@ namespace AnagramSolver.Tests.ControllersTests
         [Test]
         public async Task EditWord_WhenModelStateIsInvalid_ReturnsBadRequestResult()
         {
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ModelState.AddModelError("BaseWord", "Required");
             var word = new WordModel();
 
@@ -314,11 +313,11 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(true);
-            _unitOfWork.Setup(x => x.Words.Edit(It.IsAny<WordModel>())).Verifiable();
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(true));
+            _unitOfWork.Words.Edit(Arg.Any<WordModel>());
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -344,10 +343,10 @@ namespace AnagramSolver.Tests.ControllersTests
                 Number = 1,
                 PartOfSpeech = "dkt"
             };
-            _unitOfWork.Setup(x => x.SearchLimit.ModifySearchLimit(
-                It.IsAny<string>(), It.IsAny<uint>(), It.IsAny<uint>(), It.IsAny<bool>()))
-                .ReturnsAsync(false);
-            var controller = new HomeController(_anagramSolver.Object, _unitOfWork.Object, _configuration);
+            _unitOfWork.SearchLimit.ModifySearchLimit(
+                Arg.Any<string>(), Arg.Any<uint>(), Arg.Any<uint>(), Arg.Any<bool>())
+                .Returns(Task.FromResult(false));
+            var controller = new HomeController(_anagramSolver, _unitOfWork, _configuration);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()

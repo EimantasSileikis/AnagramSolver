@@ -2,7 +2,7 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class SearchHistoryRepository : Repository<SearchHistory>, ISearchHistoryRepository
     {
