@@ -3,6 +3,7 @@ using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace AnagramSolver.BusinessLogic.Repositories
 {
@@ -91,6 +92,11 @@ namespace AnagramSolver.BusinessLogic.Repositories
         public HashSet<WordModel> LoadDictionary()
         {
             return CodeFirstContext.Words.ToHashSet();
+        }
+
+        public void Edit(WordModel word)
+        {
+            CodeFirstContext.Entry(word).State = EntityState.Modified;
         }
     }
 }

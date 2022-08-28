@@ -13,5 +13,7 @@ namespace AnagramSolver.Contracts.Interfaces.Repositories
 
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
+
+        Task<bool> Exist(Expression<Func<TEntity, bool>> predicate);
     }
 }

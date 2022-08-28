@@ -13,5 +13,6 @@ namespace AnagramSolver.Contracts.Interfaces.Repositories
         Task SeedData();
         IEnumerable<WordModel> GetWordList(int pageIndex, int pageSize);
         int GetDictionaryCount();
+        void Edit(WordModel word);
     }
 }

@@ -7,6 +7,7 @@
             <th>Anagram</th>
             <th>Part of speech</th>
             <th>Number</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -25,6 +26,10 @@
                 <td>
                     @item.Number
                 </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a asp-action="DeleteWord" asp-route-id="@item.Id" style="color: darkred">Delete</a>
+                <td/>
             </tr>
         }
     </tbody>

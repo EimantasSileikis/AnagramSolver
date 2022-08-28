@@ -47,5 +47,11 @@ namespace AnagramSolver.BusinessLogic.Repositories
         {
             Context.Set<TEntity>().RemoveRange(entities);
         }
+
+        public async Task<bool> Exist(Expression<Func<TEntity, bool>> predicate)
+        {
+            var dfgdfg = Context.Set<TEntity>();
+            return await Context.Set<TEntity>().AnyAsync(predicate);
+        }
     }
 }
