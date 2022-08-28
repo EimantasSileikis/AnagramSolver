@@ -12,6 +12,7 @@ namespace AnagramSolver.Contracts.Interfaces.Core
         IDbWordRepository Words { get; }
         ICachedWordRepository CachedWords { get; }
         ISearchHistoryRepository SearchHistory { get; }
+        ISearchLimitRepository SearchLimit { get; }
         Task<int> CompleteAsync();
     }
 }
