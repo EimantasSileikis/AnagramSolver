@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
 
     public class CachedWordRepository : Repository<CachedWord>, ICachedWordRepository
@@ -18,13 +18,11 @@ namespace AnagramSolver.BusinessLogic.Repositories
         {
         }
 
-        public bool WordExists(string word)
+        public IEnumerable<string> GetCachedWordAnagrams(string word)
         {
-            return CodeFirstContext.CachedWords.Any(x => x.Word == word);
-        }
+            var cachedWords = CodeFirstContext.CachedWords;
+            var include = cachedWords.Include(c => c.Anagrams);
 
-        public IEnumerable<string> GetCachedWordWithAnagrams(string word)
-        {
             return CodeFirstContext.CachedWords.Include(c => c.Anagrams)
                 .Where(w => w.Word == word)
                 .SelectMany(w => w.Anagrams)

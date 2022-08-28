@@ -1,5 +1,5 @@
-﻿using AnagramSolver.BusinessLogic.Files;
-using AnagramSolver.BusinessLogic.Repositories;
+﻿using AnagramSolver.BusinessLogic.Data;
+using AnagramSolver.BusinessLogic.Services;
 using AnagramSolver.Cli;
 using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Interfaces.Files;
@@ -18,12 +18,12 @@ var host = Host.CreateDefaultBuilder()
     {
         services.AddSingleton<IFileManager, FileManager>();
         services.AddSingleton<IWordRepository, WordRepository>();
-        services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.Core.AnagramSolver>();
+        services.AddSingleton<IAnagramSolver, AnagramSolver.BusinessLogic.Services.AnagramSolver>();
         services.AddSingleton<UI>();
     })
     .Build();
 
-var anagramSolver = ActivatorUtilities.CreateInstance<AnagramSolver.BusinessLogic.Core.AnagramSolver>(host.Services);
+var anagramSolver = ActivatorUtilities.CreateInstance<AnagramSolver.BusinessLogic.Services.AnagramSolver>(host.Services);
 var appUI = ActivatorUtilities.CreateInstance<UI>(host.Services);
 
 static void BuildConfig(IConfigurationBuilder builder)

@@ -4,7 +4,7 @@ using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace AnagramSolver.BusinessLogic.Core
+namespace AnagramSolver.BusinessLogic.Services
 {
     public class AnagramSolver : IAnagramSolver
     {
@@ -37,7 +37,7 @@ namespace AnagramSolver.BusinessLogic.Core
 
             var maxAnagrams = _config.GetValue<int>("MaxAnagrams");
             var anagrams = await FindAnagrams(myWords);
-                
+
             return anagrams.Take(maxAnagrams);
         }
 

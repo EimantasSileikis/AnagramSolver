@@ -1,17 +1,17 @@
-using AnagramSolver.Contracts.Interfaces.Core;
 using AnagramSolver.Contracts.Interfaces.Repositories;
 using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Text;
+using NSubstitute;
 
-namespace AnagramSolver.Tests.BussinesLogicTests
+namespace AnagramSolver.Tests.Services
 {
     public class AnagramSolverTests
     {
-        Mock<IWordRepository> _wordRepository;
+        private IWordRepository _wordRepository;
         IConfiguration _configuration;
-        BusinessLogic.Core.AnagramSolver anagramSolver;
+        BusinessLogic.Services.AnagramSolver anagramSolver;
 
         [SetUp]
         public void Setup()
@@ -22,10 +22,10 @@ namespace AnagramSolver.Tests.BussinesLogicTests
                 .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(appSettings)))
                 .Build();
 
-            _wordRepository = new Mock<IWordRepository>();
-            _wordRepository.Setup(x => x.LoadDictionary()).Returns(GetSampleWords());
+            _wordRepository = Substitute.For<IWordRepository>();
+            _wordRepository.LoadDictionary().Returns(GetSampleWords());
 
-            anagramSolver = new BusinessLogic.Core.AnagramSolver(_wordRepository.Object, _configuration);
+            anagramSolver = new BusinessLogic.Services.AnagramSolver(_wordRepository, _configuration);
         }
 
         [TestCase("solo", "Oslo")]

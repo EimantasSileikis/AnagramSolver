@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace AnagramSolver.BusinessLogic.Repositories
+namespace AnagramSolver.BusinessLogic.Data
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
@@ -46,6 +46,12 @@ namespace AnagramSolver.BusinessLogic.Repositories
         public void RemoveRange(IEnumerable<TEntity> entities)
         {
             Context.Set<TEntity>().RemoveRange(entities);
+        }
+
+        public async Task<bool> Exist(Expression<Func<TEntity, bool>> predicate)
+        {
+            var dfgdfg = Context.Set<TEntity>();
+            return await Context.Set<TEntity>().AnyAsync(predicate);
         }
     }
 }

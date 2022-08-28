@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnagramSolver.BusinessLogic.Files
+namespace AnagramSolver.BusinessLogic.Services
 {
     public class FileManager : IFileManager
     {

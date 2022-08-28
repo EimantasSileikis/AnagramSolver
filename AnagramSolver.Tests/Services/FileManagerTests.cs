@@ -1,7 +1,7 @@
-﻿using AnagramSolver.BusinessLogic.Files;
+﻿using AnagramSolver.BusinessLogic.Services;
 using AnagramSolver.Contracts.Interfaces.Files;
 
-namespace AnagramSolver.Tests.BussinesLogicTests
+namespace AnagramSolver.Tests.Services
 {
     public class FileManagerTests
     {

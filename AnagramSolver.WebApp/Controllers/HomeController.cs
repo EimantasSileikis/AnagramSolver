@@ -3,7 +3,6 @@ using AnagramSolver.Contracts.Models;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Web;
 
 namespace AnagramSolver.WebApp.Controllers
 {
@@ -11,11 +10,13 @@ namespace AnagramSolver.WebApp.Controllers
     {
         private readonly IAnagramSolver _anagramSolver;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _config;
 
-        public HomeController(IAnagramSolver anagramSolver, IUnitOfWork unitOfWork)
+        public HomeController(IAnagramSolver anagramSolver, IUnitOfWork unitOfWork, IConfiguration config)
         {
             _anagramSolver = anagramSolver;
             _unitOfWork = unitOfWork;
+            _config = config;
         }
 
         public async Task<IActionResult> Index(string word)
@@ -27,20 +28,37 @@ namespace AnagramSolver.WebApp.Controllers
 
             //Response.Cookies.Append("lastInput", word);
 
-            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            string? ipAddress;
+
+            try
+            {
+                ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            }
+            catch (System.NullReferenceException ex)
+            {
+                return BadRequest(ex);
+            }
+
+            if (ipAddress == null)
+                return BadRequest();
+
+            IEnumerable<string> data = new List<string>();
+
+            if (await _unitOfWork.SearchLimit.Exist(x => x.Ip == ipAddress))
+            {
+                var ipSearchLimit = await _unitOfWork.SearchLimit.GetByIpAsync(ipAddress);
+                if (_unitOfWork.SearchHistory.Find(x => x.IpAddress == ipAddress).Count() >= ipSearchLimit?.Limit)
+                    return View("../Redirections/LimitReached");
+            }
+            else
+                await _unitOfWork.SearchLimit.AddAsync(new SearchLimit { Ip = ipAddress, Limit = _config.GetValue<uint>("SearchLimit") });
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-
-            IEnumerable<string> data = await _anagramSolver.GetAnagramsAsync(word);
+            data = await _anagramSolver.GetAnagramsAsync(word);
             stopwatch.Stop();
-            await _unitOfWork.SearchHistory
-                .AddAsync(new SearchHistory
-                {
-                    IpAddress = remoteIpAddress ?? "",
-                    SearchWord = word,
-                    Anagrams = string.Join(",", data.ToArray()),
-                    TimeSpent = (int)stopwatch.ElapsedMilliseconds
-                });
+
+            await _unitOfWork.SearchHistory.AddSearchHistoryAsync(ipAddress, word, data, (int)stopwatch.ElapsedMilliseconds);
             await _unitOfWork.CompleteAsync();
 
             return View(data);
@@ -78,20 +96,23 @@ namespace AnagramSolver.WebApp.Controllers
             [Bind("Word,PartOfSpeech,Number")] WordModel wordModel)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
-            var wordExists = _unitOfWork.Words.WordExists(wordModel);
-            if (!wordExists)
+
+            if (!_unitOfWork.Words.WordExists(wordModel))
             {
-                await _unitOfWork.Words.AddAsync(wordModel);
-                await _unitOfWork.CompleteAsync();
-                return RedirectToAction(nameof(Index));
+                if (await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(), 
+                    1, _config.GetValue<uint>("SearchLimit")))
+                {
+                    await _unitOfWork.Words.AddAsync(wordModel);
+                    await _unitOfWork.CompleteAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                    return BadRequest("Could not create word");
             }
             else
-            {
                 return BadRequest("Word already exists");
-            }
         }
 
         public async Task<IActionResult> SearchHistory()
@@ -102,5 +123,58 @@ namespace AnagramSolver.WebApp.Controllers
 
             return new EmptyResult();
         }
+
+        public async Task<IActionResult> DeleteWord(int id)
+        {
+            var word = await _unitOfWork.Words.GetAsync(id);
+
+            if (word != null)
+            {
+                if(await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    1, _config.GetValue<uint>("SearchLimit"), true))
+                {
+                    _unitOfWork.Words.Remove(word);
+                    await _unitOfWork.CompleteAsync();
+                    return RedirectToAction("Anagrams");
+                }
+                else
+                    return BadRequest("Cound not delete word");
+
+            }
+            else
+            {
+                return BadRequest("You can't delete word");
+
+            }
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var word = await _unitOfWork.Words.GetAsync(id);
+
+            return View(word);
+        }
+
+        [HttpPost, ActionName("Edit")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditWord([Bind("Id,Word,PartOfSpeech,Number")] WordModel wordModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(await _unitOfWork.SearchLimit.ModifySearchLimit(
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    1, _config.GetValue<uint>("SearchLimit")))
+            {
+                _unitOfWork.Words.Edit(wordModel);
+                await _unitOfWork.CompleteAsync();
+                return RedirectToAction("Anagrams");
+            }
+            else
+                return BadRequest("Could not edit word");
+        }
+
+        
     }
 }

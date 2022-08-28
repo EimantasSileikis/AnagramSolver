@@ -1,25 +1,26 @@
-﻿using AnagramSolver.BusinessLogic.Repositories;
+﻿using AnagramSolver.BusinessLogic.Data;
 using AnagramSolver.Contracts.Interfaces.Files;
 using AnagramSolver.Contracts.Models;
 using Moq;
+using NSubstitute;
 
-namespace AnagramSolver.Tests.BussinesLogicTests
+namespace AnagramSolver.Tests.Data
 {
     public class WordRepositoryTests
     {
-        Mock<IFileManager> _fileManager;
+        private IFileManager _fileManager;
 
         [SetUp]
         public void Setup()
         {
-            _fileManager = new Mock<IFileManager>();
+            _fileManager = Substitute.For<IFileManager>();
         }
 
         [Test]
         public void LoadDictionary_Always_ReturnsListWithoutDuplicates()
         {
-            _fileManager.Setup(x => x.ReadFile("")).Returns(new string[] { "labas\tbdv\tlabas\t3", "labas\tbdv\tlabas\t3" });
-            var wordRepository = new WordRepository(_fileManager.Object);
+            _fileManager.ReadFile("").Returns(new string[] { "labas\tbdv\tlabas\t3", "labas\tbdv\tlabas\t3" });
+            var wordRepository = new WordRepository(_fileManager);
             wordRepository.dictionaryPath = "";
 
             var result = wordRepository.LoadDictionary();
@@ -30,8 +31,8 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         [Test]
         public void LoadDictionary_Always_ReturnsList()
         {
-            _fileManager.Setup(x => x.ReadFile("")).Returns(new string[] { "labas\tbdv\tlabas\t3", "balas\tdkt\tbalas\t1", "stalas\tdkt\tstalas\t2" });
-            var wordRepository = new WordRepository(_fileManager.Object);
+            _fileManager.ReadFile("").Returns(new string[] { "labas\tbdv\tlabas\t3", "balas\tdkt\tbalas\t1", "stalas\tdkt\tstalas\t2" });
+            var wordRepository = new WordRepository(_fileManager);
             wordRepository.dictionaryPath = "";
             var expected = new HashSet<WordModel> {  new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 },
                                                 new WordModel { Word = "balas", PartOfSpeech = "dkt", Number = 1 },
@@ -45,7 +46,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         [Test]
         public void WordExists_WhenExists_ReturnsTrue()
         {
-            var wordRepository = new WordRepository(_fileManager.Object);
+            var wordRepository = new WordRepository(_fileManager);
             wordRepository.Words.Add(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 });
 
             var result = wordRepository.WordExists(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 });
@@ -56,7 +57,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         [Test]
         public void WordExists_WhenDoesNotExist_ReturnsFalse()
         {
-            var wordRepository = new WordRepository(_fileManager.Object);
+            var wordRepository = new WordRepository(_fileManager);
 
             var result = wordRepository.WordExists(new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 });
 
@@ -66,7 +67,7 @@ namespace AnagramSolver.Tests.BussinesLogicTests
         [Test]
         public void AddWord_WhenWordIsNotNull_AddsWordToHashSet()
         {
-            var wordRepository = new WordRepository(_fileManager.Object);
+            var wordRepository = new WordRepository(_fileManager);
             var word = new WordModel { Word = "labas", PartOfSpeech = "bdv", Number = 3 };
             var expected = new HashSet<WordModel> { word };
 
